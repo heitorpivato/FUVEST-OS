@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="50" fill="#bf0015"/>
-  <text x="50" y="68" font-size="52" text-anchor="middle" fill="white" font-family="system-ui,sans-serif" font-weight="bold">F</text>
+  <circle cx="50" cy="50" r="47" fill="white" stroke="#C4800A" stroke-width="4.5"/>
+  <!-- fu -->
+  <text x="28" y="51" font-size="27" font-weight="900" font-family="'Arial Rounded MT Bold',Nunito,system-ui,sans-serif" fill="#C4800A" text-anchor="middle" letter-spacing="-1">fu</text>
+  <!-- V grande azul -->
+  <text x="56" y="60" font-size="56" font-weight="900" font-family="'Arial Rounded MT Bold',Nunito,system-ui,sans-serif" fill="#5BA4D8" text-anchor="middle">V</text>
+  <!-- est -->
+  <text x="62" y="80" font-size="27" font-weight="900" font-family="'Arial Rounded MT Bold',Nunito,system-ui,sans-serif" fill="#C4800A" text-anchor="middle" letter-spacing="-1">est</text>
 </svg>
