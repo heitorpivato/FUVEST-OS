@@ -8,8 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="FUVEST OS">
 <title>FUVEST OS — Agenda v10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 /* === TOKENS AZUL (PADRÃO) === */
 :root{
   --accent:#456DFF;
@@ -157,12 +159,12 @@
 @keyframes toastUp{from{opacity:0;transform:translateY(16px) scale(.92)}to{opacity:1;transform:none}}
 @keyframes modalUp{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',ui-rounded,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;min-height:100vh;font-size:15px}
-button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',ui-rounded,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;min-height:100dvh;font-size:15px}
+button,input,select,textarea{font:inherit;-webkit-tap-highlight-color:transparent}button{cursor:pointer}a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
 *:focus-visible{outline:3px solid var(--accent-border);outline-offset:2px;border-radius:inherit}
 button:focus-visible,.card-part:focus-visible{border-radius:12px}
-.app{min-height:100vh;display:grid;grid-template-columns:224px minmax(0,1fr)}
-.sidebar{position:sticky;top:0;height:100vh;padding:20px 10px;display:flex;flex-direction:column;background:rgba(242,242,247,.82);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-right:.5px solid var(--line);z-index:20;overflow-y:auto}
+.app{min-height:100dvh;display:grid;grid-template-columns:224px minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:100svh;padding:20px 10px;display:flex;flex-direction:column;background:rgba(242,242,247,.82);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-right:.5px solid var(--line);z-index:20;overflow-y:auto}
 :root[data-theme="red-dark"] .sidebar,:root[data-theme="yellow-dark"] .sidebar{background:rgba(28,28,30,.82)}
 :root[data-theme="blue-dark"] .sidebar{background:rgba(22,28,46,.88)}
 :root[data-theme="yellow-light"] .sidebar{background:rgba(245,244,232,.82)}
@@ -231,7 +233,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
   border-radius:var(--radius-md);
   padding:14px 14px 14px 15px;
   display:grid;grid-template-columns:36px minmax(0,1fr) auto;
-  gap:12px;align-items:center;cursor:pointer;
+  gap:12px;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
   box-shadow:var(--shadow-sm);
   animation:springIn 320ms var(--spring) calc(var(--i,0)*28ms) both;
   transition:transform 160ms var(--spring),box-shadow 180ms var(--standard),background 120ms;
@@ -298,7 +300,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
   position:relative;border:0;border-radius:var(--radius-md);
   padding:11px 10px 10px 14px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.08),0 4px 14px color-mix(in srgb,var(--task-color,#888) 18%,transparent);
-  cursor:grab;will-change:transform;overflow:hidden;
+  cursor:grab;will-change:transform;overflow:hidden;-webkit-tap-highlight-color:transparent;
   background-image:linear-gradient(145deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.07) 45%,transparent 100%);
   animation:springIn 320ms var(--spring) calc(var(--i,0) * 22ms) both;
   transition:transform 180ms var(--spring),box-shadow 180ms var(--standard),filter 260ms var(--standard),opacity 260ms var(--standard);
@@ -315,7 +317,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .agenda-task .task-title{font-size:12px;font-weight:600;line-height:1.40;letter-spacing:-.010em;margin-top:8px}
 .task-tools{display:flex;justify-content:flex-end;gap:4px;margin-top:10px;opacity:0;transform:translateY(2px);transition:opacity 160ms,transform 160ms}
 .agenda-task:hover .task-tools,.agenda-task:focus-within .task-tools{opacity:1;transform:none}
-.tiny{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.26);color:inherit;border-radius:8px;width:30px;height:30px;font-size:12px;font-weight:600;transition:transform 120ms var(--spring),background 120ms}
+.tiny{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.26);color:inherit;border-radius:8px;width:34px;height:34px;font-size:12px;font-weight:600;transition:transform 120ms var(--spring),background 120ms;-webkit-tap-highlight-color:transparent}
 .tiny:hover{transform:translateY(-1px) scale(1.08);background:rgba(255,255,255,.44)}
 .tiny:active{transform:scale(.88)}
 .empty{padding:18px;border-radius:var(--radius-md);border:1px dashed var(--line-strong);color:var(--muted);font-size:11px;text-align:center}
@@ -393,7 +395,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
   .agenda-task{touch-action:pan-y}
   .agenda-task-body{padding:10px 12px}
   .task-title{font-size:12px!important}
-  .task-tools button.tiny{min-width:32px;min-height:32px;font-size:14px}
+  .task-tools button.tiny{min-width:36px;min-height:36px;font-size:14px}
   .modal{margin:16px;width:calc(100% - 32px);max-height:calc(100dvh - 80px)}
   .modal-head,.modal-foot{padding:14px 16px}
   .modal-body{padding:0 16px 16px}
@@ -424,7 +426,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .donut-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .sparkline-card{padding:16px 18px;overflow:hidden}
 /* Telegram link buttons */
-.tg-link{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:var(--fill-2);color:var(--ink-2);font-size:13px;text-decoration:none;flex-shrink:0;transition:background 120ms}
+.tg-link{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;background:var(--fill-2);color:var(--ink-2);font-size:14px;text-decoration:none;flex-shrink:0;transition:background 120ms;-webkit-tap-highlight-color:transparent}
 .tg-link:hover{background:var(--fill-3)}
 .tg-tiny{background:rgba(255,255,255,.18)!important;color:inherit!important}
 .tg-tiny:hover{background:rgba(255,255,255,.28)!important}
@@ -441,7 +443,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .streak-badge.cold{background:var(--fill-3);color:var(--muted);border:1px solid var(--line)}
 /* ===== seletor de dias (custom) ===== */
 .day-chips{display:flex;gap:4px;margin-top:10px;flex-wrap:wrap}
-.day-chip{border:1px solid var(--line);background:var(--fill-4);color:var(--ink-2);padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:background 120ms,color 120ms,border-color 120ms,transform 120ms var(--spring)}
+.day-chip{border:1px solid var(--line);background:var(--fill-4);color:var(--ink-2);padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:background 120ms,color 120ms,border-color 120ms,transform 120ms var(--spring);-webkit-tap-highlight-color:transparent}
 .day-chip:hover{background:var(--fill-2);transform:translateY(-1px)}
 .day-chip.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 28%,transparent)}
 .day-chip.today{border-color:var(--accent);color:var(--accent)}
@@ -450,7 +452,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .ex-counter-card{padding:18px}
 .ex-title{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:12px;letter-spacing:-.006em}
 .ex-controls{display:flex;align-items:center;gap:12px}
-.ex-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line-strong);background:var(--fill-3);color:var(--ink);font-size:18px;font-weight:600;display:grid;place-items:center;transition:transform 120ms var(--spring),background 120ms}
+.ex-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line-strong);background:var(--fill-3);color:var(--ink);font-size:18px;font-weight:600;display:grid;place-items:center;transition:transform 120ms var(--spring),background 120ms;-webkit-tap-highlight-color:transparent}
 .ex-btn:hover{background:var(--fill-2);transform:scale(1.08)}
 .ex-btn:active{transform:scale(.9)}
 .ex-num{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:var(--ink);min-width:40px;text-align:center}
@@ -489,7 +491,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .compact-check{font-size:10px;color:var(--task-color);flex-shrink:0;font-weight:700}
 /* ===== filtros por matéria ===== */
 .filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
-.filter-pill{border:1px solid var(--line-strong);background:var(--fill-4);color:var(--ink-2);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;transition:background 120ms,color 120ms,border-color 120ms}
+.filter-pill{border:1px solid var(--line-strong);background:var(--fill-4);color:var(--ink-2);padding:6px 12px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;transition:background 120ms,color 120ms,border-color 120ms;-webkit-tap-highlight-color:transparent;min-height:34px;display:inline-flex;align-items:center}
 .filter-pill.active{background:var(--task-color,var(--accent));color:#fff;border-color:transparent}
 .filter-pill-all.active{background:var(--ink);color:var(--bg);border-color:transparent}
 /* ===== streak ===== */
@@ -1091,7 +1093,7 @@ function renderHome(){
   const donuts=`<div class="progress-donuts">${donutChart(dayPct,accentColor,'Hoje')}${donutChart(weekPct,'#007aff',`Sem.${state.week}`)}${donutChart(allPct,'#34c759','Total')}</div>`;
 
   // Sparkline semanal
-  const spark=weekSparkline(300,56);
+  const spark=weekSparkline(0,56);
   const sparkCard=`<div class="card sparkline-card"><div class="sparkline-title">Ritmo da semana ${state.week}</div>${spark}</div>`;
 
   // Stats para metas
@@ -1575,7 +1577,7 @@ if(browserDay)state.day=browserDay;
 save();
 if(state.notificationsEnabled&&'Notification' in window&&Notification.permission==='granted')scheduleLocalReminder();
 updateDaysStudied();
-renderAll();requestAnimationFrame(()=>updateMobilePill(activeView));
+renderActive();requestAnimationFrame(()=>updateMobilePill(activeView));
 initFirebase();
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea,select'))return;
