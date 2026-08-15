@@ -1,4 +1,4 @@
-const CACHE = 'fuvest-v5';
+const CACHE = 'fuvest-v6';
 // index.html nunca entra no cache — sempre busca da rede pra garantir versão nova
 const STATIC = ['/FUVEST-OS/manifest.json', '/FUVEST-OS/icon.svg'];
 

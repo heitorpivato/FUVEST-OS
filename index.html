@@ -327,6 +327,15 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .subject-card .subject-name{font-size:13px;font-weight:700;letter-spacing:-.012em}
 .subject-card .count{margin-top:12px;display:inline-block;font-size:11px;color:var(--ink-2)}
 .subject-progress{margin-top:13px}
+.raio-x-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.raio-x-label{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin-bottom:9px}
+.raio-x-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.raio-x-top-icon{font-size:8px;font-weight:900;color:var(--accent);flex-shrink:0}
+.raio-x-name{font-size:10px;color:var(--ink-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.raio-x-pct{font-size:9px;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums;flex-shrink:0}
+.raio-x-bar-wrap{height:2.5px;background:var(--border);border-radius:2px;margin-bottom:6px;margin-top:-1px}
+.raio-x-bar-fill{height:100%;border-radius:2px;opacity:.65}
+.task-raio-hint{font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:-.01em}
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
 .theme-card{padding:15px;border:.5px solid var(--line);border-radius:var(--radius-lg);background:var(--panel);box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 160ms var(--ease-out),border-color 160ms,box-shadow 160ms}
 .theme-card:hover{transform:translateY(-2px);border-color:var(--line-strong);box-shadow:var(--shadow)}
@@ -682,6 +691,22 @@ const SUBJECTS={
   ing:{name:'Inglês',color:'#DC2626',course:'',icon:'◆',telegram:null},
   red:{name:'Redação',color:'#A16207',course:'',icon:'◇',telegram:null},
   rot:{name:'Rotina',color:'#64748B',course:'',icon:'◌',telegram:null}
+};
+const SUBJECT_TOPICS={
+  mat:[{n:'PA e PG',p:11},{n:'Probabilidade',p:10},{n:'Logaritmos',p:9},{n:'Razão e proporção',p:9}],
+  fis:[{n:'Trabalho e energia',p:13},{n:'Ondulatória',p:8},{n:'Gravitação',p:5},{n:'Campo elétrico',p:5}],
+  qui:[{n:'Equilíbrio iônico',p:14},{n:'Estequiometria',p:10},{n:'Eletroquímica',p:8},{n:'Radioatividade',p:7}],
+  bio:[{n:'Ecologia/Dinâmica pop.',p:10},{n:'Biotecnologia',p:10},{n:'Zoologia invertebrados',p:8},{n:'Fisiologia nerv.',p:8}],
+  geo:[{n:'Questões ambientais',p:16},{n:'Geomorfologia',p:16},{n:'Demografia',p:12},{n:'Geopolítica global',p:10}],
+  his:[{n:'Estruturas coloniais',p:22},{n:'Segunda Guerra',p:13},{n:'Segundo Reinado',p:11},{n:'Séc. XIX',p:8}],
+  fil:[{n:'Filosofia Antiga',p:18},{n:'Contemp. continental',p:18},{n:'Filosofia Medieval',p:18},{n:'Moderna e ética',p:9}],
+  soc:[{n:'Soc. Contemporânea',p:21},{n:'Antropologia/Etnologia',p:16},{n:'Movimentos sociais',p:11},{n:'Teorias clássicas',p:11}],
+  por:[{n:'Tendências contemp.',p:23},{n:'Interp. enunciados',p:22},{n:'Textos verb./visuais',p:22},{n:'Modernismo 2ª ger.',p:19}],
+  lit:[{n:'Tendências contemp.',p:23},{n:'Modernismo 2ª ger. prosa',p:19},{n:'Lit. africanas',p:12},{n:'Modernismo Portugal',p:8}],
+  gram:[{n:'Figuras de linguagem',p:17},{n:'Interp. enunciados',p:22},{n:'Textos verb./visuais',p:22},{n:'Coesão e coerência',p:8}],
+  itp:[{n:'Interp. enunciados',p:22},{n:'Textos verb./visuais',p:22},{n:'Figuras de linguagem',p:17},{n:'Tipologia textual',p:8}],
+  ing:[{n:'Interpretação de textos',p:79},{n:'Competência leitora',p:21}],
+  red:[],rot:[]
 };
 const DAYS={domingo:{name:'Domingo',kind:'Teoria'},segunda:{name:'Segunda',kind:'Teoria'},terca:{name:'Terça',kind:'Teoria'},quarta:{name:'Quarta',kind:'Exercícios'},quinta:{name:'Quinta',kind:'Exercícios'},sexta:{name:'Sexta',kind:'Exercícios'},sabado:{name:'Sábado',kind:'Simulado'}};
 const DAY_ORDER=Object.keys(DAYS);
@@ -1211,7 +1236,9 @@ function homeTaskCard(t,i=0){
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
   const courseLink=(s.telegram||s.local)?`<button class="tg-link" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
-  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${courseLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
+  const tp=(SUBJECT_TOPICS[t.subj]||[])[0];
+  const raioHint=tp?`<div class="task-raio-hint">↑ ${esc(tp.n)} · ${tp.p}% das provas</div>`:'';
+  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${raioHint}${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${courseLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
 }
 function agendaTaskCard(t,i=0){
   const s=subject(t.subj),bg=s.color,text=themeLuma(bg)==='dark'?'#fff':'#121318',status=t.done?'Concluída':'Em aberto';
@@ -1219,7 +1246,9 @@ function agendaTaskCard(t,i=0){
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
   const courseBtn=(s.telegram||s.local)?`<button class="tiny tg-tiny" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
-  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div><div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${courseBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
+  const tp=(SUBJECT_TOPICS[t.subj]||[])[0];
+  const raioHint=tp?`<div style="font-size:9px;opacity:.72;margin-top:2px;letter-spacing:-.01em">↑ ${esc(tp.n)} · ${tp.p}%</div>`:'';
+  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${raioHint}<div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${courseBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
 }
 function toggleCompact(){state.agendaCompact=!state.agendaCompact;save();renderAgenda();}
 function toggleFilter(subj){
@@ -1270,17 +1299,18 @@ function renderSubjects(){
     const ts=state.tasks.filter(t=>t.subj===id);
     if(!ts.length)return '';
     const d=completed(ts),p=pct(d,ts.length);
+    const topics=SUBJECT_TOPICS[id]||[];
+    const maxP=topics.length?topics[0].p:1;
+    const raioX=topics.length?`<div class="raio-x-section"><div class="raio-x-label">Raio-X FUVEST · Mais cobrados</div>${topics.map((tp,ti)=>`<div class="raio-x-row"><span class="raio-x-top-icon">${ti===0?'↑':''}</span><span class="raio-x-name">${esc(tp.n)}</span><span class="raio-x-pct">${tp.p}%</span></div><div class="raio-x-bar-wrap"><div class="raio-x-bar-fill" style="width:${Math.round(tp.p/maxP*100)}%;background:${s.color}"></div></div>`).join('')}</div>`:'';
     return `<div class="card subject-card" style="border-top:3px solid ${s.color}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span style="font-size:22px;line-height:1">${s.icon}</span>
-        <div>
-          <div class="subject-name">${esc(s.name)}</div>
-          ${s.course?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;letter-spacing:-.004em">${esc(s.course)}</div>`:''}
-        </div>
+      <div style="margin-bottom:10px">
+        <div class="subject-name">${esc(s.name)}</div>
+        ${s.course?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;letter-spacing:-.004em">${esc(s.course)}</div>`:''}
       </div>
       <div class="count">${d} de ${ts.length} tarefa${ts.length!==1?'s':''} concluída${d!==1?'s':''}</div>
       <div class="subject-progress"><div class="bar"><div style="width:${p}%;background:${s.color}"></div></div></div>
       <div style="margin-top:10px;font-size:26px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:var(--ink)">${p}<span style="font-size:13px;font-weight:600;color:var(--muted)">%</span></div>
+      ${raioX}
     </div>`;
   }).filter(Boolean).join('');
   c.innerHTML=`<div class="section-head"><div><h2>Matérias</h2><p>Progresso por disciplina no cronograma.</p></div></div><div class="subjects-grid">${items}</div>`;
