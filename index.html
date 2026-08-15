@@ -277,8 +277,10 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .agenda-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
 .toolbar-left,.toolbar-right{display:flex;gap:8px;align-items:center}
 .week-title{font-size:20px;font-weight:700;letter-spacing:-.018em}
-.week-nav-btn{padding:5px 12px!important;font-size:18px!important;font-weight:400!important;line-height:1;background:var(--fill-2)!important;color:var(--ink)!important;border:1px solid var(--border-1)!important;border-radius:8px!important;min-width:34px}
-.week-nav-btn:disabled{opacity:.3;cursor:default}
+.agenda-nav-row{display:flex;align-items:flex-start;gap:4px}
+.agenda-nav-row .agenda-board{flex:1;min-width:0}
+.week-nav-btn{padding:12px 9px!important;font-size:22px!important;font-weight:300!important;line-height:1;background:var(--fill-2)!important;color:var(--ink)!important;border:1px solid var(--border-1)!important;border-radius:10px!important;flex-shrink:0;position:sticky;top:72px;align-self:flex-start;min-width:36px;cursor:pointer}
+.week-nav-btn:disabled{opacity:.2;cursor:default}
 .agenda-board{display:grid;grid-template-columns:repeat(7,minmax(230px,1fr));gap:10px;overflow-x:auto;padding:4px 0 20px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 .agenda-col{scroll-snap-align:start;transition:transform 200ms var(--spring)}
 @media(max-width:900px){.agenda-board{grid-template-columns:repeat(7,minmax(200px,1fr));padding-bottom:18px}.agenda-col{min-width:200px}}
@@ -726,8 +728,6 @@ function syncWeekFromDate(){
   if(!state.projectStart){const m=CRONOGRAMA_VERSION.match(/(\d{4}-\d{2}-\d{2})/);if(m){const d=new Date(m[1]+'T12:00:00');const dts=d.getDay()===0?0:7-d.getDay();d.setDate(d.getDate()+dts);state.projectStart=d.toISOString().slice(0,10);}}
   // Avança semana automaticamente com base na data atual
   if(state.projectStart){const diff=(Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5);state.week=Math.min(TOTAL_WEEKS,Math.max(1,Math.floor(diff)+1));}
-  // Sincroniza o dia com hoje
-  if(browserDay)state.day=browserDay;
 }
 // ===== fim funções personalizadas =====
 const TOTAL_WEEKS=8;
@@ -1053,9 +1053,14 @@ function renderAgenda(){
     const dateHtml=wd?`<div class="col-date-num">${wd.getDate()}</div><div class="col-date-month">${wd.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</div>`:'';
     return `<div class="agenda-col" data-day="${day}"><div class="card column-card"><div class="column-head"><div><strong>${DAYS[day].name}</strong>${dateHtml}<div class="day-count">${d}/${ts.length} tarefas</div></div><div class="kind">${DAYS[day].kind}</div></div><div class="day-progress"><div style="width:${p}%"></div></div><div class="task-list">${cards}</div></div></div>`;
   }).join('');
-  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:4px"><button class="btn week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><select class="select" onchange="state.week=+this.value;save();renderActive()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-board">${boardCols}</div>`;
-  // Auto-scroll para o dia atual quando no celular
-  requestAnimationFrame(()=>{const tc=c.querySelector('.agenda-col[data-day="'+browserDay+'"]');if(tc)tc.scrollIntoView({behavior:'instant',block:'nearest',inline:'start'});});
+  const realWeek=state.projectStart?Math.min(TOTAL_WEEKS,Math.max(1,Math.floor((Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5))+1)):state.week;
+  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:6px"><select class="select" onchange="state.week=+this.value;save();renderAgenda()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-nav-row"><button class="week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><div class="agenda-board">${boardCols}</div><button class="week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button></div>`;
+  // Auto-scroll: semana atual → dia de hoje; outra semana → início (domingo)
+  requestAnimationFrame(()=>{
+    const board=c.querySelector('.agenda-board');
+    if(state.week===realWeek&&browserDay){const tc=c.querySelector('.agenda-col[data-day="'+browserDay+'"]');if(tc)tc.scrollIntoView({behavior:'instant',block:'nearest',inline:'start'});}
+    else if(board){board.scrollLeft=0;}
+  });
 }
 function renderSubjects(){
   const c=document.getElementById('view-subjects');
@@ -1345,7 +1350,9 @@ if(!Array.isArray(state.tasks)||!state.tasks.length||state.seedVersion!==CRONOGR
   const u=URL.createObjectURL(new Blob([m],{type:'application/manifest+json'}));
   const l=document.createElement('link');l.rel='manifest';l.href=u;document.head.appendChild(l);
 }catch(e){}})();
-syncWeekFromDate();save();
+syncWeekFromDate();
+if(browserDay)state.day=browserDay;
+save();
 updateDaysStudied();
 renderAll();requestAnimationFrame(()=>updateMobilePill(activeView));
 initFirebase();
