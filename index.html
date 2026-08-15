@@ -422,7 +422,17 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .progress-donuts{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:4px 0}
 .donut-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:default}
 .donut-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.sparkline-card{padding:16px 18px;overflow:visible}
+.sparkline-card{padding:16px 18px;overflow:hidden}
+/* Telegram link buttons */
+.tg-link{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:var(--fill-2);color:var(--ink-2);font-size:13px;text-decoration:none;flex-shrink:0;transition:background 120ms}
+.tg-link:hover{background:var(--fill-3)}
+.tg-tiny{background:rgba(255,255,255,.18)!important;color:inherit!important}
+.tg-tiny:hover{background:rgba(255,255,255,.28)!important}
+/* Meta card unificado */
+.meta-metric{margin-bottom:18px;padding-bottom:18px;border-bottom:.5px solid var(--line)}
+.meta-metric:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.meta-num{font-size:26px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
+.meta-label{font-size:12px;color:var(--muted);font-weight:500;margin-top:4px}
 .sparkline-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
 /* ===== fogo animado ===== */
 .flame{display:inline-block;animation:flamePulse 1.9s ease-in-out infinite;transform-origin:50% 90%;font-size:18px;will-change:transform}
@@ -639,7 +649,7 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
     <button data-view="subjects"><span class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg></span>Matérias</button>
   </nav>
   <div class="nav-label">Sistema</div>
-  <nav class="nav"><button data-view="settings"><span class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 10 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></span>Visual</button></nav>
+  <nav class="nav"><button data-view="settings"><span class="nav-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg></span>Ajustes</button></nav>
   <div class="sidebar-foot">Agenda flexível. Você move as tarefas sem quebrar o plano.</div>
 </aside>
 <main class="main"><div class="content">
@@ -650,25 +660,25 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 <section id="view-settings" class="view" style="display:none"></section>
 </div></main>
 </div>
-<nav class="mobile-nav"><div class="mobile-nav-pill" id="mobilePill"></div><button class="active" data-view="home"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span>Início</button><button data-view="agenda"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></span>Agenda</button><button data-view="subjects"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg></span>Matérias</button><button data-view="settings"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 10 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></span>Visual</button></nav>
+<nav class="mobile-nav"><div class="mobile-nav-pill" id="mobilePill"></div><button class="active" data-view="home"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span>Início</button><button data-view="agenda"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></span>Agenda</button><button data-view="subjects"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg></span>Matérias</button><button data-view="settings"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg></span>Ajustes</button></nav>
 <div class="modal-backdrop" id="modalBackdrop"><div class="modal"><div class="modal-head"><strong id="modalTitle">Nova tarefa</strong><button class="btn icon ghost" onclick="closeModal()">×</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot" id="modalFoot"></div></div></div>
 <script>
 const SUBJECTS={
-  mat:{name:'Matemática',color:'#2563EB',course:'Prof. Caju',icon:'✕'},
-  fis:{name:'Física',color:'#7C3AED',course:'Lições de Física',icon:'⚡'},
-  qui:{name:'Química',color:'#EA580C',course:'Gabriel Cabral',icon:'◎'},
-  bio:{name:'Biologia',color:'#16A34A',course:'Guilherme Goulart',icon:'◈'},
-  geo:{name:'Geografia',color:'#0F766E',course:'Terra Negra',icon:'◉'},
-  his:{name:'História',color:'#B45309',course:'Terra Negra',icon:'◷'},
-  fil:{name:'Filosofia',color:'#8B5CF6',course:'Terra Negra',icon:'◬'},
-  soc:{name:'Sociologia',color:'#BE185D',course:'Terra Negra',icon:'◑'},
-  lit:{name:'Literatura',color:'#3d4f63',course:'Farias Brito Online',icon:'◳'},
-  gram:{name:'Gramática',color:'#334155',course:'Sergio Campos',icon:'◰'},
-  itp:{name:'Interpretação',color:'#2c3a4a',course:'Sergio Campos',icon:'◱'},
-  por:{name:'Português',color:'#334155',course:'Sergio Campos',icon:'◰'},
-  ing:{name:'Inglês',color:'#DC2626',course:'',icon:'◆'},
-  red:{name:'Redação',color:'#A16207',course:'',icon:'◇'},
-  rot:{name:'Rotina',color:'#64748B',course:'',icon:'◌'}
+  mat:{name:'Matemática',color:'#2563EB',course:'Prof. Caju',icon:'✕',telegram:'https://web.telegram.org/a/#-1002511651878'},
+  fis:{name:'Física',color:'#7C3AED',course:'Lições de Física',icon:'⚡',telegram:'https://web.telegram.org/a/#-1002678948628'},
+  qui:{name:'Química',color:'#EA580C',course:'Gabriel Cabral',icon:'◎',telegram:'https://web.telegram.org/a/#-1001941777054'},
+  bio:{name:'Biologia',color:'#16A34A',course:'Guilherme Goulart',icon:'◈',telegram:'https://web.telegram.org/a/#-1002687521421'},
+  geo:{name:'Geografia',color:'#0F766E',course:'Terra Negra',icon:'◉',telegram:'https://web.telegram.org/a/#-1002644762984'},
+  his:{name:'História',color:'#B45309',course:'Terra Negra',icon:'◷',telegram:'https://web.telegram.org/a/#-1002644762984'},
+  fil:{name:'Filosofia',color:'#8B5CF6',course:'Terra Negra',icon:'◬',telegram:'https://web.telegram.org/a/#-1002644762984'},
+  soc:{name:'Sociologia',color:'#BE185D',course:'Terra Negra',icon:'◑',telegram:'https://web.telegram.org/a/#-1002644762984'},
+  lit:{name:'Literatura',color:'#3d4f63',course:'Farias Brito Online',icon:'◳',telegram:'https://web.telegram.org/a/#-1002518867321'},
+  gram:{name:'Gramática',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null},
+  itp:{name:'Interpretação',color:'#2c3a4a',course:'Sergio Campos',icon:'◱',telegram:null},
+  por:{name:'Português',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null},
+  ing:{name:'Inglês',color:'#DC2626',course:'',icon:'◆',telegram:null},
+  red:{name:'Redação',color:'#A16207',course:'',icon:'◇',telegram:null},
+  rot:{name:'Rotina',color:'#64748B',course:'',icon:'◌',telegram:null}
 };
 const DAYS={domingo:{name:'Domingo',kind:'Teoria'},segunda:{name:'Segunda',kind:'Teoria'},terca:{name:'Terça',kind:'Teoria'},quarta:{name:'Quarta',kind:'Exercícios'},quinta:{name:'Quinta',kind:'Exercícios'},sexta:{name:'Sexta',kind:'Exercícios'},sabado:{name:'Sábado',kind:'Simulado'}};
 const DAY_ORDER=Object.keys(DAYS);
@@ -711,8 +721,11 @@ function adjustExercises(delta){
   if(!state.exerciseLog)state.exerciseLog={};
   state.exerciseLog[k]=Math.max(0,(state.exerciseLog[k]||0)+delta);
   save();
+  const v=state.exerciseLog[k]||0;
   const el=document.getElementById('exCountDisplay');
-  if(el)el.textContent=state.exerciseLog[k]||0;
+  if(el)el.textContent=v;
+  const bar=document.querySelector('#exQBar>div');
+  if(bar)bar.style.width=Math.min(100,Math.round(v/(state.dailyExGoal||50)*100))+'%';
 }
 function donutChart(percent,color,label,size=80){
   const r=28,circ=2*Math.PI*r,fill=Math.min(Math.max(percent,0),100)/100*circ;
@@ -728,7 +741,8 @@ function weekSparkline(W=0,H=60){
   const line='M '+xs.map((x,i)=>`${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' L ');
   const area=line+` L ${xs[n-1].toFixed(1)},${H} L ${xs[0].toFixed(1)},${H} Z`;
   const todayIdx=DAY_ORDER.indexOf(state.day);
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;display:block;width:100%"><defs><linearGradient id="spkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#spkGrad)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${i===todayIdx?4.5:2.5}" fill="${i===todayIdx?'var(--accent)':'var(--panel)'}" stroke="var(--accent)" stroke-width="1.5"/><text x="${x.toFixed(1)}" y="${H+1}" text-anchor="middle" font-size="8" fill="${i===todayIdx?'var(--accent)':'var(--muted)'}" font-weight="${i===todayIdx?700:500}" font-family="inherit">${data[i].name}</text>`).join('')}</svg>`;
+  const svgH=H+18;
+  return `<svg width="${W}" height="${svgH}" viewBox="0 0 ${W} ${svgH}" style="display:block;width:100%"><defs><linearGradient id="spkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#spkGrad)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${i===todayIdx?4.5:2.5}" fill="${i===todayIdx?'var(--accent)':'var(--panel)'}" stroke="var(--accent)" stroke-width="1.5"/><text x="${x.toFixed(1)}" y="${H+13}" text-anchor="middle" font-size="8" fill="${i===todayIdx?'var(--accent)':'var(--muted)'}" font-weight="${i===todayIdx?700:500}" font-family="inherit">${data[i].name}</text>`).join('')}</svg>`;
 }
 function updateDaysStudied(){
   const today=new Date().toDateString();
@@ -1000,43 +1014,35 @@ function renderHome(){
   // Stats para metas
   const theoryDone=tasks.filter(t=>t.done&&(typeForTask(t)==='Teoria'||typeForTask(t)==='Revisão')).length;
   const theoryTotal=tasks.filter(t=>typeForTask(t)==='Teoria'||typeForTask(t)==='Revisão').length;
-  const redDoneW=completed(weekTasks.filter(t=>t.subj==='red'));
-  const exDoneToday=completed(tasks.filter(t=>typeForTask(t)==='Exercícios'||typeForTask(t)==='Simulado'));
+  const exDoneToday=tasks.filter(t=>t.done&&(typeForTask(t)==='Exercícios'||typeForTask(t)==='Simulado')).length;
+  const exTotal=tasks.filter(t=>typeForTask(t)==='Exercícios'||typeForTask(t)==='Simulado').length;
+  const exGoal=state.dailyExGoal||50;
+  const theoryPct=theoryTotal>0?Math.round(theoryDone/theoryTotal*100):0;
+  const exListPct=exTotal>0?Math.round(exDoneToday/exTotal*100):0;
+  const exQPct=Math.min(100,Math.round(todayEx/exGoal*100));
 
-  const metaSection=`<div class="meta-grid">
-    <div class="meta-card">
-      <div class="subject-name">Aulas concluídas</div>
-      <div class="counts">
-        <div class="count"><strong>${theoryDone}</strong> hoje</div>
-        <div class="count"><strong>${theoryTotal}</strong> total do dia</div>
-      </div>
-      <div class="hint">${theoryTotal>0?Math.round(theoryDone/theoryTotal*100):0}% do dia</div>
+  const metaSection=`<div class="card" style="padding:20px 20px 16px">
+    <div class="meta-metric">
+      <div class="meta-num" style="color:#456DFF">${theoryDone}/${theoryTotal}</div>
+      <div class="meta-label">Aulas concluídas</div>
+      <div class="bar" style="margin-top:6px"><div style="width:${theoryPct}%;background:#456DFF;transition:width 600ms"></div></div>
     </div>
-    <div class="meta-card">
-      <div class="subject-name">Redações</div>
-      <div class="counts">
-        <div class="count"><strong>${completed(tasks.filter(t=>t.subj==='red'))}</strong> hoje</div>
-        <div class="count"><strong>${redDoneW}</strong> na semana</div>
-      </div>
-    </div>
-    <div class="meta-card">
-      <div class="subject-name">Exercícios resolvidos</div>
-      <div class="counts" style="flex-direction:column;align-items:flex-start;gap:10px">
-        <div class="count"><strong>${exDoneToday}</strong> tarefas feitas</div>
-        <div class="ex-controls" style="gap:8px">
+    <div class="meta-metric">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="meta-num" style="color:#16A34A" id="exCountDisplay">${todayEx}</div>
+        <div style="font-size:13px;color:var(--muted);font-weight:500">/ ${exGoal}</div>
+        <div style="display:flex;gap:5px;margin-left:auto">
           <button class="ex-btn" onclick="adjustExercises(-1)">−</button>
-          <div class="ex-num" id="exCountDisplay" style="font-size:22px;min-width:36px">${todayEx}</div>
           <button class="ex-btn" onclick="adjustExercises(1)">+</button>
         </div>
       </div>
-      <div class="hint">${weekExTotal} questões nesta semana</div>
+      <div class="meta-label">Questões respondidas</div>
+      <div class="bar" style="margin-top:6px" id="exQBar"><div style="width:${exQPct}%;background:#16A34A;transition:width 600ms"></div></div>
     </div>
-    <div class="meta-card">
-      <div class="subject-name">Dias seguidos</div>
-      <div class="counts">
-        <div class="count"><strong>${streak}</strong> dia${streak!==1?'s':''} <span class="${streak>0?'flame':''}">🔥</span></div>
-      </div>
-      <div class="hint">${streak>1?`Em sequência há ${streak} dias!`:streak===1?'Sequência iniciada hoje!':'Comece hoje sua sequência.'}</div>
+    <div class="meta-metric" style="margin-bottom:0">
+      <div class="meta-num" style="color:#EA580C">${exDoneToday}/${exTotal}</div>
+      <div class="meta-label">Listas de exercícios feitas</div>
+      <div class="bar" style="margin-top:6px"><div style="width:${exListPct}%;background:#EA580C;transition:width 600ms"></div></div>
     </div>
   </div>`;
 
@@ -1114,14 +1120,16 @@ function homeTaskCard(t,i=0){
   const code=extractCode(t.title);
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
-  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-right"><span class="subj-chip">${esc(s.name)}</span></div></article>`;
+  const tgLink=s.telegram?`<a href="${s.telegram}" target="_blank" rel="noopener" class="tg-link" onclick="event.stopPropagation()" title="Abrir canal Telegram">↗</a>`:'';
+  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${tgLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
 }
 function agendaTaskCard(t,i=0){
   const s=subject(t.subj),bg=s.color,text=themeLuma(bg)==='dark'?'#fff':'#121318',status=t.done?'Concluída':'Em aberto';
   const code=extractCode(t.title);
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
-  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div><div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button><button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
+  const tgBtn=s.telegram?`<button class="tiny tg-tiny" onclick="event.stopPropagation();window.open('${s.telegram}','_blank')" title="Abrir canal Telegram">↗</button>`:'';
+  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div><div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${tgBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
 }
 function toggleCompact(){state.agendaCompact=!state.agendaCompact;save();renderAgenda();}
 function toggleFilter(subj){
@@ -1248,7 +1256,7 @@ function renderSettings(){
     </div>`;
   document.getElementById('view-settings').innerHTML=`<div class="section-head"><div><h2>Visual</h2><p>O tema é alterado somente aqui. O resto da agenda permanece igual.</p></div></div><div class="theme-grid">${themes.map(t=>`<div class="theme-card ${state.theme===t[0]?'active':''}" onclick="setTheme('${t[0]}')">${previewFor(t)}<strong>${t[3]}</strong><span>${t[4]}</span></div>`).join('')}${autoCard}</div>${projectSection}${fbSection}${notifSection}`;
 }
-function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>{x.style.display='none';x.classList.remove('active')});document.getElementById('view-'+v).style.display='block';document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={home:['Início','Seu dia, suas metas e o andamento da preparação.'],agenda:['Agenda','Organize por semana e por dia. Mova sem perder flexibilidade.'],subjects:['Matérias','Visão simples do andamento por disciplina.'],settings:['Visual','Escolha apenas a aparência da agenda.']};document.getElementById('pageTitle').textContent=titles[v][0];document.getElementById('pageSubtitle').textContent=titles[v][1];renderActive();requestAnimationFrame(()=>updateMobilePill(v))}
+function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>{x.style.display='none';x.classList.remove('active')});document.getElementById('view-'+v).style.display='block';document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={home:['Início','Seu dia, suas metas e o andamento da preparação.'],agenda:['Agenda','Organize por semana e por dia. Mova sem perder flexibilidade.'],subjects:['Matérias','Visão simples do andamento por disciplina.'],settings:['Ajustes','Tema, projeto, notificações e sincronização.']};document.getElementById('pageTitle').textContent=titles[v][0];document.getElementById('pageSubtitle').textContent=titles[v][1];renderActive();requestAnimationFrame(()=>updateMobilePill(v))}
 function updateMobilePill(v){const nav=document.querySelector('.mobile-nav');const pill=document.getElementById('mobilePill');const btn=nav?.querySelector(`[data-view="${v}"]`);if(!nav||!pill||!btn)return;const nr=nav.getBoundingClientRect();const br=btn.getBoundingClientRect();pill.style.left=(br.left-nr.left)+'px';pill.style.width=br.width+'px'}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 function renderAll(){renderHome();renderAgenda();renderSubjects();renderSettings()}
