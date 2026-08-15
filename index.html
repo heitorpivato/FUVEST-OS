@@ -556,6 +556,60 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .meta-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .meta-name{flex:1;min-width:0;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.006em}
 .meta-badge{font-size:9px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;background:var(--fill-3);padding:3px 7px;border-radius:6px}
+
+/* === MOBILE OPTIMIZATION === */
+.home-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){
+  /* Responsive chart row (donuts + sparkline) */
+  .home-chart-row{grid-template-columns:1fr!important}
+  /* Topbar simplificada */
+  .page-title h1{font-size:22px!important;letter-spacing:-.02em}
+  .page-title p{display:none}
+  .topbar{margin-bottom:14px}
+  /* Hero compacto */
+  .hero{min-height:0!important;padding:18px 16px!important}
+  .hero h2{font-size:20px!important}
+  /* Day chips mais tappáveis */
+  .day-chip{padding:9px 13px!important;font-size:12px!important;min-height:38px}
+  /* Botão de check maior e grid ajustado */
+  .home-task{grid-template-columns:42px minmax(0,1fr) auto!important}
+  .home-task .check{width:42px!important;height:42px!important}
+  /* Home task título legível */
+  .home-task .task-title{font-size:13.5px!important}
+  /* Agenda: snap mandatório no mobile */
+  .agenda-board:not(.compact){scroll-snap-type:x mandatory!important}
+  /* Compact mode nunca vira layout fixo no mobile */
+  .agenda-board.compact{grid-template-columns:repeat(7,minmax(160px,1fr))!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;overflow:auto!important}
+  .agenda-board.compact .agenda-col{min-width:160px!important;scroll-snap-align:start!important}
+  /* Filter bar: scroll horizontal sem quebrar */
+  .filter-bar{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:6px}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-pill{white-space:nowrap;flex-shrink:0}
+  /* Agenda toolbar menor */
+  .agenda-toolbar .week-title{font-size:16px}
+  /* Meta grid: manter 2 colunas */
+  .meta-grid{grid-template-columns:1fr 1fr!important}
+  .meta-card{padding:12px 11px}
+  .meta-stat{padding:12px 11px}
+  .meta-stat .ms-value{font-size:24px}
+  /* Section head compacto */
+  .section-head{margin:16px 0 10px!important}
+  .section-head h2{font-size:17px!important}
+  /* Donuts - menos gap */
+  .progress-donuts{gap:8px;flex-wrap:wrap;justify-content:center}
+  /* Subjects grid 1 col */
+  .subjects-grid{grid-template-columns:1fr!important}
+  /* Tema grid 2 colunas */
+  .theme-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:380px){
+  /* Telas muito pequenas */
+  .content{padding:12px 10px 86px!important;padding-bottom:max(86px,calc(86px + env(safe-area-inset-bottom)))!important}
+  .meta-grid{grid-template-columns:1fr!important}
+  .meta-stat .ms-value{font-size:22px}
+  .day-chip{padding:8px 9px!important;font-size:11px!important}
+  .home-chart-row{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
@@ -664,7 +718,15 @@ function updateDaysStudied(){
   const today=new Date().toDateString();
   if(state.lastStudiedDate!==today){state.daysStudied=(state.daysStudied||0)+1;state.lastStudiedDate=today;save();}
 }
-function setProjectStart(v){state.projectStart=v;if(v){const diff=(Date.now()-new Date(v))/(7*864e5);state.week=Math.max(1,Math.min(TOTAL_WEEKS,Math.ceil(diff)));}save();renderSettings();renderActive();}
+function setProjectStart(v){state.projectStart=v;if(v){const diff=(Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5);state.week=Math.min(TOTAL_WEEKS,Math.max(1,Math.floor(diff)+1));}save();renderSettings();renderActive();}
+function syncWeekFromDate(){
+  // Auto-define projectStart a partir da data no CRONOGRAMA_VERSION se não estiver definido
+  if(!state.projectStart){const m=CRONOGRAMA_VERSION.match(/(\d{4}-\d{2}-\d{2})/);if(m){const d=new Date(m[1]+'T12:00:00');d.setDate(d.getDate()-d.getDay());state.projectStart=d.toISOString().slice(0,10);}}
+  // Avança semana automaticamente com base na data atual
+  if(state.projectStart){const diff=(Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5);state.week=Math.min(TOTAL_WEEKS,Math.max(1,Math.floor(diff)+1));}
+  // Sincroniza o dia com hoje
+  if(browserDay)state.day=browserDay;
+}
 // ===== fim funções personalizadas =====
 const TOTAL_WEEKS=8;
 function uid(){return 't_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
@@ -742,6 +804,7 @@ function initFirebase(){
           const keepTheme=state.theme,keepKey=state.syncKey,keepSeed=state.seedVersion;
           Object.assign(state,remote);
           state.theme=keepTheme;state.syncKey=keepKey;state.seedVersion=keepSeed;
+          syncWeekFromDate();
           document.documentElement.dataset.theme=state.theme;
           localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
           renderActive();
@@ -884,7 +947,7 @@ function renderHome(){
         ${weekSelect}${dayChips}
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 4px">
+    <div class="home-chart-row" style="margin:20px 0 4px">
       <div class="card" style="padding:20px">${donuts}</div>
       ${sparkCard}
     </div>
@@ -965,14 +1028,11 @@ function toggleFilter(subj){
 }
 function weekDatesMap(){
   const result={};
-  if(state.projectStart){
-    const start=new Date(state.projectStart+'T12:00:00');
-    const offset=(state.week-1)*7;
-    DAY_ORDER.forEach((d,i)=>{const dt=new Date(start);dt.setDate(dt.getDate()+offset+i);result[d]=dt;});
-  } else {
-    const today=new Date();const sun=new Date(today);sun.setDate(today.getDate()-today.getDay());
-    DAY_ORDER.forEach((d,i)=>{const dt=new Date(sun);dt.setDate(sun.getDate()+i);result[d]=dt;});
-  }
+  const today=new Date();
+  const thisSun=new Date(today);thisSun.setDate(today.getDate()-today.getDay());
+  const startSun=state.projectStart?new Date(state.projectStart+'T12:00:00'):thisSun;
+  const offset=(state.week-1)*7;
+  DAY_ORDER.forEach((d,i)=>{const dt=new Date(startSun);dt.setDate(dt.getDate()+offset+i);result[d]=dt;});
   return result;
 }
 function renderAgenda(){
@@ -992,6 +1052,8 @@ function renderAgenda(){
     return `<div class="agenda-col" data-day="${day}"><div class="card column-card"><div class="column-head"><div><strong>${DAYS[day].name}</strong>${dateHtml}<div class="day-count">${d}/${ts.length} tarefas</div></div><div class="kind">${DAYS[day].kind}</div></div><div class="day-progress"><div style="width:${p}%"></div></div><div class="task-list">${cards}</div></div></div>`;
   }).join('');
   c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:6px"><select class="select" onchange="state.week=+this.value;save();renderActive()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-board">${boardCols}</div>`;
+  // Auto-scroll para o dia atual quando no celular
+  requestAnimationFrame(()=>{const tc=c.querySelector('.agenda-col[data-day="'+browserDay+'"]');if(tc)tc.scrollIntoView({behavior:'instant',block:'nearest',inline:'start'});});
 }
 function renderSubjects(){
   const c=document.getElementById('view-subjects');
@@ -1281,6 +1343,7 @@ if(!Array.isArray(state.tasks)||!state.tasks.length||state.seedVersion!==CRONOGR
   const u=URL.createObjectURL(new Blob([m],{type:'application/manifest+json'}));
   const l=document.createElement('link');l.rel='manifest';l.href=u;document.head.appendChild(l);
 }catch(e){}})();
+syncWeekFromDate();save();
 updateDaysStudied();
 renderAll();requestAnimationFrame(()=>updateMobilePill(activeView));
 initFirebase();
