@@ -673,9 +673,9 @@ const SUBJECTS={
   fil:{name:'Filosofia',color:'#8B5CF6',course:'Terra Negra',icon:'◬',telegram:'https://web.telegram.org/a/#-1002644762984'},
   soc:{name:'Sociologia',color:'#BE185D',course:'Terra Negra',icon:'◑',telegram:'https://web.telegram.org/a/#-1002644762984'},
   lit:{name:'Literatura',color:'#3d4f63',course:'Farias Brito Online',icon:'◳',telegram:'https://web.telegram.org/a/#-1002518867321'},
-  gram:{name:'Gramática',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null},
-  itp:{name:'Interpretação',color:'#2c3a4a',course:'Sergio Campos',icon:'◱',telegram:null},
-  por:{name:'Português',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null},
+  gram:{name:'Gramática',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null,local:'C:\\Users\\heito\\Documents\\Gramática - Professor Sérgio Campos (2022)'},
+  itp:{name:'Interpretação',color:'#2c3a4a',course:'Sergio Campos',icon:'◱',telegram:null,local:'C:\\Users\\heito\\Documents\\Gramática - Professor Sérgio Campos (2022)'},
+  por:{name:'Português',color:'#334155',course:'Sergio Campos',icon:'◰',telegram:null,local:'C:\\Users\\heito\\Documents\\Gramática - Professor Sérgio Campos (2022)'},
   ing:{name:'Inglês',color:'#DC2626',course:'',icon:'◆',telegram:null},
   red:{name:'Redação',color:'#A16207',course:'',icon:'◇',telegram:null},
   rot:{name:'Rotina',color:'#64748B',course:'',icon:'◌',telegram:null}
@@ -756,6 +756,30 @@ function installPWA(){if(!_deferredInstall)return;_deferredInstall.prompt();_def
 
 // ===== Notificações locais =====
 const NOTIF_ICON='/FUVEST-OS/icon.svg';
+
+// ===== Gerenciamento de abas de curso =====
+const _courseWins={};
+function openCourse(subj){
+  const s=subject(subj);
+  if(s.telegram){
+    // Telegram: abre/foca aba nomeada
+    const key='fuvest_tg_'+subj;
+    if(_courseWins[subj]&&!_courseWins[subj].closed){
+      _courseWins[subj].focus();
+    }else{
+      _courseWins[subj]=window.open(s.telegram,key);
+    }
+  }else if(s.local){
+    // Local: copia o caminho pro clipboard
+    navigator.clipboard.writeText(s.local).then(()=>toast('Caminho copiado: '+s.local)).catch(()=>toast('Pasta: '+s.local));
+  }
+}
+function closeCourseTab(subj){
+  if(_courseWins[subj]&&!_courseWins[subj].closed){
+    try{_courseWins[subj].close();}catch(e){}
+    delete _courseWins[subj];
+  }
+}
 const NOTIF_MSGS_MANHA=[
   n=>`${n} tarefa${n>1?'s':''} hoje. A FEA-USP não vai esperar você começar amanhã.`,
   n=>`Bom dia, Heitor. ${n} item${n>1?'s':''} no plano. Fecha tudo hoje.`,
@@ -1183,16 +1207,16 @@ function homeTaskCard(t,i=0){
   const code=extractCode(t.title);
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
-  const tgLink=s.telegram?`<a href="${s.telegram}" target="_blank" rel="noopener" class="tg-link" onclick="event.stopPropagation()" title="Abrir canal Telegram">↗</a>`:'';
-  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${tgLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
+  const courseLink=(s.telegram||s.local)?`<button class="tg-link" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
+  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${courseLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
 }
 function agendaTaskCard(t,i=0){
   const s=subject(t.subj),bg=s.color,text=themeLuma(bg)==='dark'?'#fff':'#121318',status=t.done?'Concluída':'Em aberto';
   const code=extractCode(t.title);
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
-  const tgBtn=s.telegram?`<button class="tiny tg-tiny" onclick="event.stopPropagation();window.open('${s.telegram}','_blank')" title="Abrir canal Telegram">↗</button>`:'';
-  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div><div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${tgBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
+  const courseBtn=(s.telegram||s.local)?`<button class="tiny tg-tiny" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
+  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div><div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${courseBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
 }
 function toggleCompact(){state.agendaCompact=!state.agendaCompact;save();renderAgenda();}
 function toggleFilter(subj){
@@ -1342,7 +1366,7 @@ function toggleTask(id,skipDragCheck=false){
   if(!skipDragCheck&&Date.now()-_lastDragEndTime<320)return;
   const t=state.tasks.find(x=>x.id===id);if(!t)return;
   const parts=ensureParts(t);t.done=!t.done;parts.forEach(p=>p.done=t.done);
-  if(t.done){navigator.vibrate&&navigator.vibrate(12);updateStreak();}
+  if(t.done){navigator.vibrate&&navigator.vibrate(12);updateStreak();closeCourseTab(t.subj);}
   save();
   const els=document.querySelectorAll(`[data-task-id="${id}"]`);
   if(els.length){

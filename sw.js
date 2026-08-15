@@ -1,8 +1,9 @@
-const CACHE = 'fuvest-v3';
-const URLS = ['/FUVEST-OS/', '/FUVEST-OS/index.html', '/FUVEST-OS/manifest.json', '/FUVEST-OS/icon.svg'];
+const CACHE = 'fuvest-v4';
+// index.html nunca entra no cache — sempre busca da rede pra garantir versão nova
+const STATIC = ['/FUVEST-OS/manifest.json', '/FUVEST-OS/icon.svg'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)).catch(() => {}));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)).catch(() => {}));
   self.skipWaiting();
 });
 
@@ -11,13 +12,20 @@ self.addEventListener('activate', e => {
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then(wins => wins.forEach(w => w.postMessage({ type: 'SW_UPDATED' })))
+      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+      .then(wins => Promise.all(wins.map(w => w.navigate(w.url))))  // força reload em todas as abas abertas
   );
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const url = e.request.url;
+  // index.html e raiz: sempre rede, sem cache
+  if (url.includes('index.html') || url.match(/\/FUVEST-OS\/?$/)) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
+  }
+  // resto: rede primeiro, cache como fallback
   e.respondWith(
     fetch(e.request).then(res => {
       if (res.status === 200) {
@@ -25,7 +33,7 @@ self.addEventListener('fetch', e => {
         caches.open(CACHE).then(c => c.put(e.request, clone));
       }
       return res;
-    }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/FUVEST-OS/')))
+    }).catch(() => caches.match(e.request))
   );
 });
 
