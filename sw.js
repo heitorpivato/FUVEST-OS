@@ -1,4 +1,4 @@
-const CACHE = 'fuvest-v1';
+const CACHE = 'fuvest-v2';
 const URLS = ['/FUVEST-OS/', '/FUVEST-OS/index.html', '/FUVEST-OS/manifest.json', '/FUVEST-OS/icon.svg'];
 
 self.addEventListener('install', e => {
@@ -16,16 +16,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => caches.match('/FUVEST-OS/'));
-    })
+    fetch(e.request).then(res => {
+      if (res.status === 200) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/FUVEST-OS/')))
   );
 });
 
@@ -36,7 +33,8 @@ self.addEventListener('push', e => {
     icon: '/FUVEST-OS/icon.svg',
     badge: '/FUVEST-OS/icon.svg',
     vibrate: [200, 100, 200],
-    tag: 'fuvest-daily',
+    tag: d.tag || 'fuvest-daily',
+    requireInteraction: d.require || false,
     data: { url: '/FUVEST-OS/' }
   }));
 });

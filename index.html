@@ -755,7 +755,44 @@ window.addEventListener('appinstalled',()=>{_deferredInstall=null;renderSettings
 function installPWA(){if(!_deferredInstall)return;_deferredInstall.prompt();_deferredInstall.userChoice.then(r=>{if(r.outcome==='accepted')_deferredInstall=null;renderSettings();});}
 
 // ===== Notificações locais =====
-let _notifTimer=null;
+const NOTIF_ICON='/FUVEST-OS/icon.svg';
+const NOTIF_MSGS_MANHA=[
+  n=>`${n} tarefa${n>1?'s':''} hoje. A FEA-USP não vai esperar você começar amanhã.`,
+  n=>`Bom dia, Heitor. ${n} item${n>1?'s':''} no plano. Fecha tudo hoje.`,
+  n=>`${n} tarefa${n>1?'s':''} no seu dia. Enquanto você lê isso, alguém já começou.`,
+  n=>`Dia de estudo. ${n} tarefa${n>1?'s':''} pra bater. Administração-USP é pra quem não falta.`,
+  n=>`${n} tarefa${n>1?'s':''} esperando. A prova é em novembro — cada dia conta.`,
+];
+const NOTIF_MSGS_TARDE=[
+  n=>`${n} tarefa${n>1?'s':''} ainda aberta${n>1?'s':''}. A tarde ainda salva o dia.`,
+  n=>`Meio do dia, ${n} item${n>1?'s':''} pendente${n>1?'s':''}. Não deixa virar noite.`,
+  n=>`${n} tarefa${n>1?'s':''} pra fechar ainda. FEA-USP é pra quem não desiste no meio.`,
+  n=>`Lembrete da tarde: ${n} tarefa${n>1?'s':''} em aberto. Bora.`,
+];
+const NOTIF_MSGS_NOITE=[
+  (d,t)=>d===t?`Dia fechado, ${t} tarefa${t>1?'s':''} concluída${t>1?'s':''}. Sequência mantida.`:`${d}/${t} hoje. Amanhã você zera o restante.`,
+  (d,t)=>d===t?`100% hoje. É isso. FEA-USP é construída assim, dia após dia.`:`${d} de ${t} hoje. Já é algo — não para aqui.`,
+  (d,t)=>d>=t*0.8?`Quase lá — ${d}/${t}. Você está no ritmo certo pra Fuvest 2027.`:`${d}/${t} hoje. O ritmo importa mais que a perfeição.`,
+];
+const NOTIF_MSGS_STREAK=[
+  s=>`⚠️ ${s} dia${s>1?'s':''} de sequência em risco. Abre o app e marca pelo menos uma tarefa.`,
+  s=>`Sua sequência de ${s} dia${s>1?'s':''} quebra hoje se você não abrir. Vale a pena perder?`,
+  s=>`${s} dia${s>1?'s':''} seguidos. Não joga fora agora — faz pelo menos uma tarefa.`,
+];
+function _pickMsg(arr,...args){return arr[Math.floor(Math.random()*arr.length)](...args);}
+function _notify(tag,title,body,opts={}){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  new Notification(title,{body,icon:NOTIF_ICON,tag,requireInteraction:opts.require||false,...(opts.silent!=null?{silent:opts.silent}:{})});
+}
+let _notifTimers={};
+function _schedAt(tag,h,m,fn){
+  clearTimeout(_notifTimers[tag]);
+  const now=new Date();
+  const t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0,0);
+  if(t<=now)t.setDate(t.getDate()+1);
+  _notifTimers[tag]=setTimeout(()=>{fn();_schedAt(tag,h,m,fn);},t-now);
+}
+let _notifTimer=null; // compat alias
 async function requestNotifPermission(){
   if(!('Notification' in window)){toast('Seu navegador não suporta notificações.');return;}
   const p=await Notification.requestPermission();
@@ -765,23 +802,45 @@ async function requestNotifPermission(){
   else toast('Permissão negada nas configurações do navegador.');
 }
 function scheduleLocalReminder(){
-  clearTimeout(_notifTimer);
   if(!state.notificationsEnabled||Notification.permission!=='granted')return;
-  const [h,m]=(state.reminderTime||'07:00').split(':').map(Number);
-  const now=new Date();
-  const target=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0,0);
-  if(target<=now)target.setDate(target.getDate()+1);
-  _notifTimer=setTimeout(()=>{
-    const todayDow=DAY_ORDER[new Date().getDay()];
-    const pending=currentWeekTasks().filter(t=>t.day===todayDow&&!t.done);
-    if(pending.length>0){
-      new Notification('FUVEST OS ☀️',{
-        body:`Bom dia! Você tem ${pending.length} tarefa${pending.length>1?'s':''} hoje.`,
-        icon:'/FUVEST-OS/icon.svg',tag:'fuvest-daily'
-      });
-    }
-    scheduleLocalReminder();
-  },target-now);
+  const [hm,mm]=(state.reminderTime||'07:00').split(':').map(Number);
+
+  // 1. Lembrete matinal (horário configurável, padrão 07:00)
+  _schedAt('manha',hm,mm,()=>{
+    const dow=DAY_ORDER[new Date().getDay()];
+    const pending=currentWeekTasks().filter(t=>t.day===dow&&!t.done);
+    if(pending.length>0)_notify('manha','FUVEST OS — Bom dia',_pickMsg(NOTIF_MSGS_MANHA,pending.length));
+  });
+
+  // 2. Pressão da tarde (15:00) — só dispara se ainda tem tarefas abertas
+  _schedAt('tarde',15,0,()=>{
+    const dow=DAY_ORDER[new Date().getDay()];
+    const pending=currentWeekTasks().filter(t=>t.day===dow&&!t.done);
+    if(pending.length>0)_notify('tarde','FUVEST OS — Tarde',_pickMsg(NOTIF_MSGS_TARDE,pending.length));
+  });
+
+  // 3. Fechamento do dia (21:30) — resumo do que foi feito
+  _schedAt('noite',21,30,()=>{
+    const dow=DAY_ORDER[new Date().getDay()];
+    const all=currentWeekTasks().filter(t=>t.day===dow);
+    const done=all.filter(t=>t.done).length;
+    _notify('noite','FUVEST OS — Dia encerrado',_pickMsg(NOTIF_MSGS_NOITE,done,all.length),{require:false});
+  });
+
+  // 4. Alerta de streak (22:00) — só se nenhuma tarefa foi concluída hoje
+  _schedAt('streak',22,0,()=>{
+    const dow=DAY_ORDER[new Date().getDay()];
+    const done=currentWeekTasks().filter(t=>t.day===dow&&t.done).length;
+    const streak=state.streak||0;
+    if(done===0&&streak>0)_notify('streak','FUVEST OS ⚠️',_pickMsg(NOTIF_MSGS_STREAK,streak),{require:true});
+  });
+
+  // 5. Abertura de semana (segunda-feira 08:00)
+  _schedAt('semana',8,0,()=>{
+    if(new Date().getDay()!==1)return; // só segunda
+    const wkTasks=currentWeekTasks();
+    _notify('semana',`FUVEST OS — Semana ${state.week}`,`${wkTasks.length} tarefa${wkTasks.length!==1?'s':''} nesta semana. Começa forte, Heitor.`);
+  });
 }
 
 // ===== Calendar export (.ics) =====
