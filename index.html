@@ -722,6 +722,98 @@ function updateDaysStudied(){
   const today=new Date().toDateString();
   if(state.lastStudiedDate!==today){state.daysStudied=(state.daysStudied||0)+1;state.lastStudiedDate=today;save();}
 }
+// ===== PWA install prompt =====
+let _deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_deferredInstall=e;renderSettings();});
+window.addEventListener('appinstalled',()=>{_deferredInstall=null;renderSettings();toast('App instalado!');});
+function installPWA(){if(!_deferredInstall)return;_deferredInstall.prompt();_deferredInstall.userChoice.then(r=>{if(r.outcome==='accepted')_deferredInstall=null;renderSettings();});}
+
+// ===== Notificações locais =====
+let _notifTimer=null;
+async function requestNotifPermission(){
+  if(!('Notification' in window)){toast('Seu navegador não suporta notificações.');return;}
+  const p=await Notification.requestPermission();
+  state.notificationsEnabled=p==='granted';
+  save();renderSettings();
+  if(p==='granted'){scheduleLocalReminder();toast('Notificações ativadas!');}
+  else toast('Permissão negada nas configurações do navegador.');
+}
+function scheduleLocalReminder(){
+  clearTimeout(_notifTimer);
+  if(!state.notificationsEnabled||Notification.permission!=='granted')return;
+  const [h,m]=(state.reminderTime||'07:00').split(':').map(Number);
+  const now=new Date();
+  const target=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0,0);
+  if(target<=now)target.setDate(target.getDate()+1);
+  _notifTimer=setTimeout(()=>{
+    const todayDow=DAY_ORDER[new Date().getDay()];
+    const pending=currentWeekTasks().filter(t=>t.day===todayDow&&!t.done);
+    if(pending.length>0){
+      new Notification('FUVEST OS ☀️',{
+        body:`Bom dia! Você tem ${pending.length} tarefa${pending.length>1?'s':''} hoje.`,
+        icon:'/FUVEST-OS/icon.svg',tag:'fuvest-daily'
+      });
+    }
+    scheduleLocalReminder();
+  },target-now);
+}
+
+// ===== Exportar para Google Calendar (.ics) =====
+function exportToICS(){
+  const wdates=weekDatesMap();
+  const pad=n=>String(n).padStart(2,'0');
+  const fmt=dt=>`${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}`;
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//FUVEST OS//v10//PT','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  DAY_ORDER.forEach(day=>{
+    const dt=wdates[day];if(!dt)return;
+    const ds=fmt(dt);const nd=new Date(dt);nd.setDate(dt.getDate()+1);const ds2=fmt(nd);
+    dayTasks(day,state.week).forEach(t=>{
+      const subj=SUBJECTS[t.subj]||{name:t.subj};
+      lines.push('BEGIN:VEVENT',
+        `DTSTART;VALUE=DATE:${ds}`,`DTEND;VALUE=DATE:${ds2}`,
+        `SUMMARY:[${subj.name}] ${t.title||''}`,
+        `DESCRIPTION:${t.type||''}${t.done?' ✓':''}`,
+        `STATUS:${t.done?'COMPLETED':'NEEDS-ACTION'}`,
+        `UID:fuvest-w${state.week}-${t.id||Math.random().toString(36).slice(2)}@fuvest-os`,
+        'END:VEVENT');
+    });
+  });
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`fuvest-semana${state.week}.ics`;a.click();
+  URL.revokeObjectURL(url);
+  toast('Exportado! Importe no Google Calendar.');
+}
+
+// ===== Relatório semanal =====
+function showWeeklyReport(){
+  const wk=currentWeekTasks();
+  const donePct=pct(completed(wk),wk.length);
+  const bySubj={};
+  wk.forEach(t=>{if(!bySubj[t.subj])bySubj[t.subj]={done:0,total:0};bySubj[t.subj].total++;if(t.done)bySubj[t.subj].done++;});
+  let bestDay=DAY_ORDER[0],bestPct=-1;
+  DAY_ORDER.forEach(d=>{const ts=dayTasks(d,state.week);const p=ts.length?pct(completed(ts),ts.length):0;if(ts.length>0&&p>bestPct){bestPct=p;bestDay=d;}});
+  const subjRows=Object.entries(bySubj).map(([id,s])=>{
+    const subj=SUBJECTS[id]||{name:id,color:'var(--accent)'};const p=pct(s.done,s.total);
+    return `<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:${subj.color};font-weight:600">${esc(subj.name)}</span><span style="color:var(--muted)">${s.done}/${s.total} · ${p}%</span></div><div class="bar" style="height:5px"><div style="width:${p}%;background:${subj.color}"></div></div></div>`;
+  }).join('');
+  document.getElementById('modalTitle').textContent=`Relatório — Semana ${state.week}`;
+  document.getElementById('modalBody').innerHTML=`
+    <div style="text-align:center;padding:16px 0 20px">
+      <div style="font-size:52px;font-weight:800;letter-spacing:-.04em;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums">${donePct}<span style="font-size:18px;font-weight:600">%</span></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${completed(wk)} de ${wk.length} tarefas concluídas</div>
+    </div>
+    <div style="margin-bottom:16px">${subjRows}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Melhor dia</div><div style="font-weight:700;font-size:15px">${DAYS[bestDay]?.name||bestDay}</div><div style="font-size:11px;color:var(--muted)">${bestPct}% concluído</div></div>
+      <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Semanas restantes</div><div style="font-weight:700;font-size:15px">${TOTAL_WEEKS-state.week}</div><div style="font-size:11px;color:var(--muted)">de ${TOTAL_WEEKS} total</div></div>
+    </div>
+    <button class="btn" style="width:100%" onclick="exportToICS()">📅 Exportar para Google Calendar</button>`;
+  document.getElementById('modalFoot').innerHTML=`<button class="btn primary" onclick="closeModal()">Fechar</button>`;
+  showModal();
+}
+
 function setProjectStart(v){state.projectStart=v;if(v){const diff=(Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5);state.week=Math.min(TOTAL_WEEKS,Math.max(1,Math.floor(diff)+1));}save();renderSettings();renderActive();}
 function syncWeekFromDate(){
   // Auto-define projectStart a partir da data no CRONOGRAMA_VERSION se não estiver definido
@@ -942,7 +1034,7 @@ function renderHome(){
         <div style="margin-bottom:12px">${streakHtml}</div>
         <p class="greeting-msg">${esc(getGreeting())}</p>
         <h2 style="margin:14px 0 6px;font-size:24px;font-weight:800;letter-spacing:-.022em;line-height:1.15;color:var(--ink)">${tasks.length?`${tasks.length} tarefa${tasks.length>1?'s':''} no seu ${esc(DAYS[state.day].name)}`.replace(/^\w/,c=>c.toUpperCase()):`Dia livre — descanso também é parte do plano.`}</h2>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><button class="btn primary" onclick="switchView('agenda')">Abrir agenda</button><button class="btn" onclick="openTask()">+ Tarefa</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><button class="btn primary" onclick="switchView('agenda')">Abrir agenda</button><button class="btn" onclick="openTask()">+ Tarefa</button><button class="btn" onclick="showWeeklyReport()">Relatório</button></div>
       </div>
       <div class="card" style="padding:20px">
         <div class="eyebrow" style="margin-bottom:8px">${todayDate}</div>
@@ -1054,7 +1146,7 @@ function renderAgenda(){
     return `<div class="agenda-col" data-day="${day}"><div class="card column-card"><div class="column-head"><div><strong>${DAYS[day].name}</strong>${dateHtml}<div class="day-count">${d}/${ts.length} tarefas</div></div><div class="kind">${DAYS[day].kind}</div></div><div class="day-progress"><div style="width:${p}%"></div></div><div class="task-list">${cards}</div></div></div>`;
   }).join('');
   const realWeek=state.projectStart?Math.min(TOTAL_WEEKS,Math.max(1,Math.floor((Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5))+1)):state.week;
-  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:6px"><select class="select" onchange="state.week=+this.value;save();renderAgenda()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-nav-row"><button class="week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><div class="agenda-board">${boardCols}</div><button class="week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button></div>`;
+  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:6px"><button class="btn" onclick="exportToICS()" title="Exportar para Google Calendar" style="padding:6px 10px;font-size:16px">📅</button><select class="select" onchange="state.week=+this.value;save();renderAgenda()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-nav-row"><button class="week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><div class="agenda-board">${boardCols}</div><button class="week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button></div>`;
   // Auto-scroll: semana atual → dia de hoje; outra semana → início (domingo)
   requestAnimationFrame(()=>{
     const board=c.querySelector('.agenda-board');
@@ -1129,7 +1221,20 @@ function renderSettings(){
         <div class="days-studied"><strong>${state.streak||0}</strong> dias seguidos</div>
       </div>
     </div>`;
-  document.getElementById('view-settings').innerHTML=`<div class="section-head"><div><h2>Visual</h2><p>O tema é alterado somente aqui. O resto da agenda permanece igual.</p></div></div><div class="theme-grid">${themes.map(t=>`<div class="theme-card ${state.theme===t[0]?'active':''}" onclick="setTheme('${t[0]}')">${previewFor(t)}<strong>${t[3]}</strong><span>${t[4]}</span></div>`).join('')}${autoCard}</div>${projectSection}${fbSection}`;
+  const notifPerm=('Notification' in window)?Notification.permission:'unsupported';
+  const notifSection=`<div class="section-head" style="margin-top:28px"><div><h2>Notificações</h2><p>Lembrete diário no navegador. Para funcionar com o app fechado, instale como PWA.</p></div></div>
+    <div class="card" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:${state.notificationsEnabled?'14px':'0'}">
+        <div><div style="font-weight:600;font-size:14px">${state.notificationsEnabled?'🔔 Ativado':'🔕 Desativado'}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Status: ${notifPerm==='granted'?'permitido':notifPerm==='denied'?'bloqueado':'não solicitado'}</div></div>
+        ${notifPerm==='denied'?`<div style="font-size:11px;color:#e62f34">Bloqueado. Habilite nas configurações do navegador.</div>`:`<button class="btn ${state.notificationsEnabled?'ghost':'primary'}" onclick="requestNotifPermission()">${state.notificationsEnabled?'Reconfigurar':'Ativar'}</button>`}
+      </div>
+      ${state.notificationsEnabled?`<div style="display:flex;align-items:center;gap:10px"><label style="font-size:12px;color:var(--muted);white-space:nowrap">Horário do lembrete</label><input type="time" class="input" style="width:auto" value="${state.reminderTime||'07:00'}" onchange="state.reminderTime=this.value;save();scheduleLocalReminder();toast('Horário salvo.')"></div>`:''}
+    </div>
+  <div class="section-head" style="margin-top:20px"><div><h2>Instalar App</h2><p>Acesso rápido na tela inicial e modo offline.</p></div></div>
+    <div class="card" style="padding:16px">
+      ${_deferredInstall?`<button class="btn primary" onclick="installPWA()">Instalar no celular / computador</button>`:`<div style="font-size:12px;color:var(--muted);line-height:1.6">No Chrome: toque em <strong>⋮</strong> → <strong>"Adicionar à tela inicial"</strong>.<br>No Safari (iOS): toque em <strong>□↑</strong> → <strong>"Adicionar à Tela de Início"</strong>.</div>`}
+    </div>`;
+  document.getElementById('view-settings').innerHTML=`<div class="section-head"><div><h2>Visual</h2><p>O tema é alterado somente aqui. O resto da agenda permanece igual.</p></div></div><div class="theme-grid">${themes.map(t=>`<div class="theme-card ${state.theme===t[0]?'active':''}" onclick="setTheme('${t[0]}')">${previewFor(t)}<strong>${t[3]}</strong><span>${t[4]}</span></div>`).join('')}${autoCard}</div>${projectSection}${fbSection}${notifSection}`;
 }
 function switchView(v){activeView=v;document.querySelectorAll('.view').forEach(x=>{x.style.display='none';x.classList.remove('active')});document.getElementById('view-'+v).style.display='block';document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));const titles={home:['Início','Seu dia, suas metas e o andamento da preparação.'],agenda:['Agenda','Organize por semana e por dia. Mova sem perder flexibilidade.'],subjects:['Matérias','Visão simples do andamento por disciplina.'],settings:['Visual','Escolha apenas a aparência da agenda.']};document.getElementById('pageTitle').textContent=titles[v][0];document.getElementById('pageSubtitle').textContent=titles[v][1];renderActive();requestAnimationFrame(()=>updateMobilePill(v))}
 function updateMobilePill(v){const nav=document.querySelector('.mobile-nav');const pill=document.getElementById('mobilePill');const btn=nav?.querySelector(`[data-view="${v}"]`);if(!nav||!pill||!btn)return;const nr=nav.getBoundingClientRect();const br=btn.getBoundingClientRect();pill.style.left=(br.left-nr.left)+'px';pill.style.width=br.width+'px'}
@@ -1344,15 +1449,17 @@ if(!Array.isArray(state.tasks)||!state.tasks.length||state.seedVersion!==CRONOGR
 }else{
   state.tasks.forEach(t=>{t.subj=categorizePor(t);ensureParts(t);});
 }
-// PWA manifest (injected as blob so it works from file:// and any origin)
-(function(){try{
-  const m=JSON.stringify({name:'FUVEST OS',short_name:'FUVEST',display:'standalone',background_color:'#f2f2f7',theme_color:'#e62f34',start_url:'.',icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23bf0015'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='system-ui,sans-serif' font-weight='bold'>F</text></svg>",sizes:'any',type:'image/svg+xml'}]});
-  const u=URL.createObjectURL(new Blob([m],{type:'application/manifest+json'}));
-  const l=document.createElement('link');l.rel='manifest';l.href=u;document.head.appendChild(l);
-}catch(e){}})();
+// PWA: manifest real + service worker
+(function(){
+  try{const l=document.createElement('link');l.rel='manifest';l.href='/FUVEST-OS/manifest.json';document.head.appendChild(l);}catch(e){}
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/FUVEST-OS/sw.js',{scope:'/FUVEST-OS/'}).catch(()=>{});
+  }
+})();
 syncWeekFromDate();
 if(browserDay)state.day=browserDay;
 save();
+if(state.notificationsEnabled&&'Notification' in window&&Notification.permission==='granted')scheduleLocalReminder();
 updateDaysStudied();
 renderAll();requestAnimationFrame(()=>updateMobilePill(activeView));
 initFirebase();

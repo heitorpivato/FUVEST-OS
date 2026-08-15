@@ -1,0 +1,19 @@
+{
+  "name": "FUVEST OS",
+  "short_name": "FUVEST",
+  "description": "Cronograma de estudos FUVEST 2027",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f2f2f7",
+  "theme_color": "#bf0015",
+  "start_url": "/FUVEST-OS/",
+  "scope": "/FUVEST-OS/",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
