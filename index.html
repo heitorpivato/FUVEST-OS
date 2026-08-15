@@ -274,8 +274,9 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .count{font-size:10px;font-weight:600;padding:6px 9px;border-radius:var(--radius-xs,8px);background:var(--fill-3);letter-spacing:-.006em}
 .count strong{font-size:12px;font-weight:800;margin-right:3px;font-variant-numeric:tabular-nums}
 .meta-card .hint{margin-top:9px;font-size:10px;color:var(--ink-3)}
-.agenda-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
+.agenda-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
 .toolbar-left,.toolbar-right{display:flex;gap:8px;align-items:center}
+.week-nav-inline{display:none}
 .week-title{font-size:20px;font-weight:700;letter-spacing:-.018em}
 .agenda-nav-row{display:flex;align-items:flex-start;gap:4px}
 .agenda-nav-row .agenda-board{flex:1;min-width:0}
@@ -585,12 +586,23 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
   /* Compact mode nunca vira layout fixo no mobile */
   .agenda-board.compact{grid-template-columns:repeat(7,minmax(160px,1fr))!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;overflow:auto!important}
   .agenda-board.compact .agenda-col{min-width:160px!important;scroll-snap-align:start!important}
+  /* Setas laterais: esconder no mobile, usar botões no toolbar */
+  .week-nav-btn{display:none!important}
+  .agenda-nav-row{gap:0!important}
+  .week-nav-inline{display:inline-flex!important;align-items:center;justify-content:center;padding:6px 11px!important;font-size:18px!important;font-weight:300!important;min-width:36px}
+  /* Coluna ocupa quase tela toda */
+  .agenda-col{min-width:calc(100vw - 26px)!important}
+  /* Toolbar: empilha título e controles se apertar */
+  .agenda-toolbar{flex-wrap:wrap;gap:6px}
+  .agenda-toolbar .week-title{font-size:15px}
   /* Filter bar: scroll horizontal sem quebrar */
   .filter-bar{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:6px}
   .filter-bar::-webkit-scrollbar{display:none}
   .filter-pill{white-space:nowrap;flex-shrink:0}
-  /* Agenda toolbar menor */
-  .agenda-toolbar .week-title{font-size:16px}
+  /* Day chips: linha única com scroll */
+  .day-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+  .day-chips::-webkit-scrollbar{display:none}
+  .day-chip{padding:8px 11px!important;font-size:11.5px!important;min-height:36px;flex-shrink:0}
   /* Meta grid: manter 2 colunas */
   .meta-grid{grid-template-columns:1fr 1fr!important}
   .meta-card{padding:12px 11px}
@@ -1146,7 +1158,7 @@ function renderAgenda(){
     return `<div class="agenda-col" data-day="${day}"><div class="card column-card"><div class="column-head"><div><strong>${DAYS[day].name}</strong>${dateHtml}<div class="day-count">${d}/${ts.length} tarefas</div></div><div class="kind">${DAYS[day].kind}</div></div><div class="day-progress"><div style="width:${p}%"></div></div><div class="task-list">${cards}</div></div></div>`;
   }).join('');
   const realWeek=state.projectStart?Math.min(TOTAL_WEEKS,Math.max(1,Math.floor((Date.now()-new Date(state.projectStart+'T12:00:00'))/(7*864e5))+1)):state.week;
-  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:6px"><button class="btn" onclick="exportToCalendar()" title="Adicionar ao Google Calendar" style="padding:6px 10px;font-size:16px">📅</button><select class="select" onchange="state.week=+this.value;save();renderAgenda()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-nav-row"><button class="week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><div class="agenda-board">${boardCols}</div><button class="week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button></div>`;
+  c.innerHTML=`<div class="agenda-toolbar"><div><div class="week-title">Semana ${state.week} <span style="font-size:11px;font-weight:500;color:var(--muted)">${doneW}/${wk.length} concluídas</span></div></div><div class="toolbar-right" style="gap:5px"><button class="btn ghost week-nav-inline" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><select class="select" onchange="state.week=+this.value;save();renderAgenda()">${Array.from({length:TOTAL_WEEKS},(_,i)=>`<option value="${i+1}" ${state.week===i+1?'selected':''}>Semana ${i+1}</option>`).join('')}</select><button class="btn ghost week-nav-inline" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button><button class="btn primary" onclick="openTask()">+ Tarefa</button></div></div><div class="progress-card" style="margin-bottom:10px;padding:11px 16px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Progresso da semana</span><strong style="font-size:12px">${weekPct}%</strong></div><div class="bar" style="margin-top:6px"><div style="width:${weekPct}%"></div></div></div>${filterPills}<div class="agenda-nav-row"><button class="week-nav-btn" onclick="if(state.week>1){state.week--;save();renderAgenda()}" ${state.week<=1?'disabled':''}>‹</button><div class="agenda-board">${boardCols}</div><button class="week-nav-btn" onclick="if(state.week<TOTAL_WEEKS){state.week++;save();renderAgenda()}" ${state.week>=TOTAL_WEEKS?'disabled':''}>›</button></div>`;
   // Auto-scroll: semana atual → dia de hoje; outra semana → início (domingo)
   requestAnimationFrame(()=>{
     const board=c.querySelector('.agenda-board');
