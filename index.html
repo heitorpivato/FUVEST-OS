@@ -1080,12 +1080,20 @@ function renderHome(){
   const exListPct=exTotal>0?Math.round(exDoneToday/exTotal*100):0;
   const exQPct=Math.min(100,Math.round(todayEx/exGoal*100));
 
-  const metaSection=`<div class="card" style="padding:20px 20px 16px">
+  const metaAulas=theoryTotal>0?`
     <div class="meta-metric">
       <div class="meta-num" style="color:#456DFF">${theoryDone}/${theoryTotal}</div>
       <div class="meta-label">Aulas concluídas</div>
       <div class="bar" style="margin-top:6px"><div style="width:${theoryPct}%;background:#456DFF;transition:width 600ms"></div></div>
-    </div>
+    </div>`:'';
+  const metaListas=exTotal>0?`
+    <div class="meta-metric">
+      <div class="meta-num" style="color:#EA580C">${exDoneToday}/${exTotal}</div>
+      <div class="meta-label">Listas de exercícios feitas</div>
+      <div class="bar" style="margin-top:6px"><div style="width:${exListPct}%;background:#EA580C;transition:width 600ms"></div></div>
+    </div>`:'';
+  const metaSection=`<div class="card" style="padding:20px 20px 16px">
+    ${metaAulas}
     <div class="meta-metric">
       <div style="display:flex;align-items:center;gap:10px">
         <div class="meta-num" style="color:#16A34A" id="exCountDisplay">${todayEx}</div>
@@ -1098,11 +1106,7 @@ function renderHome(){
       <div class="meta-label">Questões respondidas</div>
       <div class="bar" style="margin-top:6px" id="exQBar"><div style="width:${exQPct}%;background:#16A34A;transition:width 600ms"></div></div>
     </div>
-    <div class="meta-metric" style="margin-bottom:0">
-      <div class="meta-num" style="color:#EA580C">${exDoneToday}/${exTotal}</div>
-      <div class="meta-label">Listas de exercícios feitas</div>
-      <div class="bar" style="margin-top:6px"><div style="width:${exListPct}%;background:#EA580C;transition:width 600ms"></div></div>
-    </div>
+    ${metaListas}
   </div>`;
 
   document.getElementById('view-home').innerHTML=`
