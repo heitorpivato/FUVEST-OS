@@ -336,6 +336,17 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .raio-x-bar-wrap{height:2.5px;background:var(--border);border-radius:2px;margin-bottom:6px;margin-top:-1px}
 .raio-x-bar-fill{height:100%;border-radius:2px;opacity:.65}
 .task-raio-hint{font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:-.01em}
+.ex-counter-wrap{margin-top:5px}
+.ex-counter{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:rgba(234,88,12,.13);font-size:10.5px;font-weight:700;color:#EA580C;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent;transition:background 140ms}
+.ex-counter:hover,.ex-counter:active{background:rgba(234,88,12,.22)}
+.ex-edit-box{display:flex;align-items:center;gap:6px;margin-top:6px;padding:7px 9px;background:var(--panel);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap}
+.ex-edit-label{font-size:9.5px;color:var(--muted);white-space:nowrap}
+.ex-edit-box input[type=number]{width:48px;padding:4px 6px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--ink);font-size:13px;font-weight:700;text-align:center;-moz-appearance:textfield;-webkit-appearance:none}
+.ex-edit-box input[type=number]::-webkit-outer-spin-button,.ex-edit-box input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ex-edit-save{padding:4px 12px;border-radius:7px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border:none;cursor:pointer;margin-left:2px;-webkit-tap-highlight-color:transparent}
+.agenda-task .ex-counter{background:rgba(255,255,255,.2);color:inherit}
+.agenda-task .ex-edit-box{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.2)}
+.agenda-task .ex-edit-box input{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:inherit}
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
 .theme-card{padding:15px;border:.5px solid var(--line);border-radius:var(--radius-lg);background:var(--panel);box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 160ms var(--ease-out),border-color 160ms,box-shadow 160ms}
 .theme-card:hover{transform:translateY(-2px);border-color:var(--line-strong);box-shadow:var(--shadow)}
@@ -1230,15 +1241,45 @@ function togglePart(id,index){
   });
 }
 function taskColors(id){return subject(id).color}
+function exCounterHtml(t){
+  if(!['Exercícios','Simulado'].includes(typeForTask(t)))return '';
+  const done=t.exDone??null,total=t.exTotal??null;
+  const label=(done!==null||total!==null)?`${done??'?'} / ${total??'?'} quest.`:'+ quest.';
+  return `<div class="ex-counter-wrap" onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()"><button class="ex-counter" onclick="openExEdit(this)">${label}</button><div class="ex-edit-box" style="display:none"></div></div>`;
+}
+function openExEdit(btn){
+  const box=btn.nextElementSibling;if(!box)return;
+  if(box.style.display!=='none'){box.style.display='none';return;}
+  const id=btn.closest('[data-task-id]')?.dataset.taskId;if(!id)return;
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  box.innerHTML=`<span class="ex-edit-label">Feitas</span><input type="number" min="0" value="${t.exDone??''}" placeholder="0"><span class="ex-edit-label">/</span><input type="number" min="0" value="${t.exTotal??''}" placeholder="total"><button class="ex-edit-save" onclick="saveExCount(this)">OK</button>`;
+  box.style.display='flex';box.querySelector('input')?.focus();
+}
+function saveExCount(saveBtn){
+  const box=saveBtn.closest('.ex-edit-box');
+  const id=saveBtn.closest('[data-task-id]')?.dataset.taskId;
+  if(!box||!id)return;
+  const inputs=box.querySelectorAll('input');
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  const prevDone=t.exDone??0;
+  t.exDone=inputs[0]?.value!==''?Math.max(0,parseInt(inputs[0].value)||0):null;
+  t.exTotal=inputs[1]?.value!==''?Math.max(0,parseInt(inputs[1].value)||0):null;
+  save();
+  const delta=(t.exDone??0)-prevDone;
+  if(delta!==0)adjustExercises(delta);
+  document.querySelectorAll('[data-task-id="'+id+'"] .ex-counter').forEach(b=>{
+    const done=t.exDone,total=t.exTotal;
+    b.textContent=(done!==null||total!==null)?`${done??'?'} / ${total??'?'} quest.`:'+ quest.';
+  });
+  box.style.display='none';
+}
 function homeTaskCard(t,i=0){
   const s=subject(t.subj),bg=s.color,status=t.done?'Concluída':'Em aberto';
   const code=extractCode(t.title);
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
   const courseLink=(s.telegram||s.local)?`<button class="tg-link" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
-  const tp=(SUBJECT_TOPICS[t.subj]||[])[0];
-  const raioHint=tp?`<div class="task-raio-hint">↑ ${esc(tp.n)} · ${tp.p}% das provas</div>`:'';
-  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${raioHint}${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${courseLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
+  return `<article data-task-id="${t.id}" class="home-task ${t.done?'done':''}" style="--task-color:${bg};--i:${Math.min(i,7)}" onclick="toggleTask('${t.id}')" onpointerdown="homeSwipeStart(event,'${t.id}')" tabindex="0" aria-label="${esc(s.name)} — ${esc(t.title)}"><button class="check" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Reativar':'Concluir'} tarefa">${t.done?'✓':''}</button><div class="home-task-body"><div class="task-title">${esc(t.title)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${exCounterHtml(t)}${course}${codeBadge}${partProgress(t)}</div><div class="task-right">${courseLink}<span class="subj-chip">${esc(s.name)}</span></div></article>`;
 }
 function agendaTaskCard(t,i=0){
   const s=subject(t.subj),bg=s.color,text=themeLuma(bg)==='dark'?'#fff':'#121318',status=t.done?'Concluída':'Em aberto';
@@ -1246,9 +1287,7 @@ function agendaTaskCard(t,i=0){
   const course=s.course?`<div class="task-source">${esc(s.course)}</div>`:'';
   const codeBadge=code?`<div class="task-code">${esc(code)}</div>`:'';
   const courseBtn=(s.telegram||s.local)?`<button class="tiny tg-tiny" onclick="event.stopPropagation();openCourse('${t.subj}')" title="${s.telegram?'Abrir canal Telegram':s.local?'Copiar caminho da pasta':''}">${s.local&&!s.telegram?'📁':'↗'}</button>`:'';
-  const tp=(SUBJECT_TOPICS[t.subj]||[])[0];
-  const raioHint=tp?`<div style="font-size:9px;opacity:.72;margin-top:2px;letter-spacing:-.01em">↑ ${esc(tp.n)} · ${tp.p}%</div>`:'';
-  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${raioHint}<div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${courseBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
+  return `<article data-task-id="${t.id}" class="agenda-task ${t.done?'done':''}" style="--task-color:${bg};background-color:${bg};color:${text};--i:${Math.min(i,7)}" aria-label="${esc(s.name)} — ${esc(t.title)}" onpointerdown="taskPointerDown(event,'${t.id}')" onclick="toggleTask('${t.id}')" tabindex="0"><div class="accent-strip"></div><div class="agenda-task-body"><div class="subject-name">${esc(s.name)}</div><div class="task-type">${esc(typeForTask(t))} · ${status}</div>${exCounterHtml(t)}<div class="task-title">${esc(t.title)}</div>${course}${codeBadge}${partProgress(t)}</div><div class="task-tools" onclick="event.stopPropagation()"><button class="tiny" onclick="toggleTask('${t.id}')" title="${t.done?'Reativar':'Concluir'}">${t.done?'↺':'✓'}</button><button class="tiny" onclick="editTask('${t.id}')" title="Editar">✎</button>${courseBtn}<button class="tiny" onclick="deleteTask('${t.id}')" title="Excluir">×</button></div></article>`;
 }
 function toggleCompact(){state.agendaCompact=!state.agendaCompact;save();renderAgenda();}
 function toggleFilter(subj){
