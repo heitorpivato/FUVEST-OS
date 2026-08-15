@@ -1532,7 +1532,14 @@ if(!Array.isArray(state.tasks)||!state.tasks.length||state.seedVersion!==CRONOGR
 (function(){
   try{const l=document.createElement('link');l.rel='manifest';l.href='/FUVEST-OS/manifest.json';document.head.appendChild(l);}catch(e){}
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/FUVEST-OS/sw.js',{scope:'/FUVEST-OS/'}).catch(()=>{});
+    navigator.serviceWorker.register('/FUVEST-OS/sw.js',{scope:'/FUVEST-OS/'}).then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const sw=reg.installing;
+        sw.addEventListener('statechange',()=>{
+          if(sw.state==='activated')window.location.reload();
+        });
+      });
+    }).catch(()=>{});
   }
 })();
 syncWeekFromDate();

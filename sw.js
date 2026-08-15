@@ -1,4 +1,4 @@
-const CACHE = 'fuvest-v2';
+const CACHE = 'fuvest-v3';
 const URLS = ['/FUVEST-OS/', '/FUVEST-OS/index.html', '/FUVEST-OS/manifest.json', '/FUVEST-OS/icon.svg'];
 
 self.addEventListener('install', e => {
@@ -7,10 +7,13 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(wins => wins.forEach(w => w.postMessage({ type: 'SW_UPDATED' })))
+  );
 });
 
 self.addEventListener('fetch', e => {
