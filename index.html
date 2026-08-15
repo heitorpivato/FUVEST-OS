@@ -758,69 +758,7 @@ function scheduleLocalReminder(){
   },target-now);
 }
 
-// ===== Google Calendar API =====
-const GCAL_CLIENT_ID='266232110814-v8aci8fj09qeogu4baf535v664eng5uv.apps.googleusercontent.com';
-const GCAL_SCOPE='https://www.googleapis.com/auth/calendar.events';
-let _gcalToken=null;
-
-function gcalLogin(cb){
-  if(_gcalToken){cb(_gcalToken);return;}
-  // Carrega Google Identity Services se ainda não carregou
-  if(!window.google?.accounts?.oauth2){
-    const s=document.createElement('script');
-    s.src='https://accounts.google.com/gsi/client';
-    s.onload=()=>gcalLogin(cb);
-    document.head.appendChild(s);
-    return;
-  }
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:GCAL_CLIENT_ID,
-    scope:GCAL_SCOPE,
-    callback:resp=>{
-      if(resp.error){toast('Erro ao conectar com Google: '+resp.error);return;}
-      _gcalToken=resp.access_token;
-      cb(_gcalToken);
-    }
-  });
-  client.requestAccessToken();
-}
-
-async function exportToCalendar(){
-  gcalLogin(async token=>{
-    const wdates=weekDatesMap();
-    const tasks=[];
-    DAY_ORDER.forEach(day=>{
-      const dt=wdates[day];if(!dt)return;
-      dayTasks(day,state.week).forEach(t=>{
-        const subj=SUBJECTS[t.subj]||{name:t.subj};
-        const nd=new Date(dt);nd.setDate(dt.getDate()+1);
-        tasks.push({
-          summary:`[${subj.name}] ${t.title||''}`,
-          description:`${t.type||''}${t.done?' ✓':''}`,
-          start:{date:dt.toISOString().slice(0,10)},
-          end:{date:nd.toISOString().slice(0,10)},
-          colorId:t.done?'2':'1'
-        });
-      });
-    });
-    if(!tasks.length){toast('Nenhuma tarefa nesta semana.');return;}
-    toast(`Exportando ${tasks.length} tarefas...`);
-    let ok=0,fail=0;
-    for(const ev of tasks){
-      try{
-        const r=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
-          method:'POST',
-          headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
-          body:JSON.stringify(ev)
-        });
-        if(r.ok)ok++;else fail++;
-      }catch{fail++;}
-    }
-    toast(fail===0?`✓ ${ok} eventos criados no Google Calendar!`:`${ok} criados, ${fail} falharam.`);
-  });
-}
-
-// Mantém .ics como fallback
+// ===== Calendar export (.ics) =====
 function exportToICS(){
   const wdates=weekDatesMap();
   const pad=n=>String(n).padStart(2,'0');
@@ -871,7 +809,6 @@ function showWeeklyReport(){
       <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Melhor dia</div><div style="font-weight:700;font-size:15px">${DAYS[bestDay]?.name||bestDay}</div><div style="font-size:11px;color:var(--muted)">${bestPct}% concluído</div></div>
       <div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Semanas restantes</div><div style="font-weight:700;font-size:15px">${TOTAL_WEEKS-state.week}</div><div style="font-size:11px;color:var(--muted)">de ${TOTAL_WEEKS} total</div></div>
     </div>
-    <button class="btn" style="width:100%;margin-bottom:6px" onclick="exportToCalendar()">📅 Adicionar ao Google Calendar</button>
     <button class="btn ghost" style="width:100%;font-size:11px" onclick="exportToICS()">Baixar .ics (offline)</button>`;
   document.getElementById('modalFoot').innerHTML=`<button class="btn primary" onclick="closeModal()">Fechar</button>`;
   showModal();
