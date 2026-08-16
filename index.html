@@ -1721,7 +1721,7 @@ document.addEventListener('keydown',e=>{
   document.body.appendChild(spot);
   let _tilt=null,_raf=null,_mx=-500,_my=-500;
   // Allowlist: só esses card-types recebem tilt 3D
-  const TILT_ALLOW=['hero','column-card','subject-card'];
+  const TILT_ALLOW=['subject-card'];
   function isTiltable(card){
     if(!card)return false;
     if(card.closest('.modal'))return false;
