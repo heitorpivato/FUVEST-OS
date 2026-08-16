@@ -322,8 +322,8 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 .tiny:active{transform:scale(.88)}
 .empty{padding:18px;border-radius:var(--radius-md);border:1px dashed var(--line-strong);color:var(--muted);font-size:11px;text-align:center}
 .subjects-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.subject-card{padding:17px;position:relative;overflow:hidden;transition:transform 160ms var(--ease-out),box-shadow 160ms}
-.subject-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.subject-card{padding:17px;position:relative;transition:box-shadow 160ms}
+.subject-card:hover{box-shadow:var(--shadow)}
 .subject-card .subject-name{font-size:13px;font-weight:700;letter-spacing:-.012em}
 .subject-card .count{margin-top:12px;display:inline-block;font-size:11px;color:var(--ink-2)}
 .subject-progress{margin-top:13px}
@@ -1744,7 +1744,7 @@ document.addEventListener('keydown',e=>{
       const r=safe.getBoundingClientRect();
       const dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
       const dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
-      safe.style.transform=`perspective(1000px) rotateY(${(dx*5).toFixed(2)}deg) rotateX(${(-dy*4).toFixed(2)}deg) translateY(-2px)`;
+      safe.style.transform=`perspective(800px) rotateY(${(dx*10).toFixed(2)}deg) rotateX(${(-dy*8).toFixed(2)}deg) translateY(-4px) scale(1.02)`;
       safe.style.boxShadow='var(--shadow-lg),0 0 0 1px color-mix(in srgb,var(--accent) 20%,transparent)';
     }
   });
