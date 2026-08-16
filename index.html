@@ -1720,15 +1720,12 @@ document.addEventListener('keydown',e=>{
   spot.className='spotlight';
   document.body.appendChild(spot);
   let _tilt=null,_raf=null,_mx=-500,_my=-500;
-  // Classes que NÃO recebem tilt — cards muito pequenos ou dentro de listas
-  const NO_TILT=['column-card','card-part','card-progress','home-task','agenda-task','sparkline-card','ex-edit-box'];
+  // Allowlist: só esses card-types recebem tilt 3D
+  const TILT_ALLOW=['hero','column-card','subject-card'];
   function isTiltable(card){
     if(!card)return false;
-    if(NO_TILT.some(c=>card.classList.contains(c)))return false;
     if(card.closest('.modal'))return false;
-    // Deve ser um card de nível razoável (não dentro de outro card)
-    const parent=card.parentElement?.closest('.card');
-    return !parent;
+    return TILT_ALLOW.some(c=>card.classList.contains(c));
   }
   function resetTilt(c){
     if(!c)return;
