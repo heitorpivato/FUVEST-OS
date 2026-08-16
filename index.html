@@ -661,10 +661,10 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
 }
 /* ===== Glass & Mouse FX ===== */
 .sidebar{backdrop-filter:blur(72px) saturate(220%)!important;-webkit-backdrop-filter:blur(72px) saturate(220%)!important}
-.card{backdrop-filter:blur(40px) saturate(200%)!important;-webkit-backdrop-filter:blur(40px) saturate(200%)!important;transform-style:preserve-3d;will-change:transform}
+.card{backdrop-filter:blur(40px) saturate(200%)!important;-webkit-backdrop-filter:blur(40px) saturate(200%)!important}
 .modal-backdrop{backdrop-filter:blur(40px) saturate(200%)!important;-webkit-backdrop-filter:blur(40px) saturate(200%)!important}
 .spotlight{position:fixed;width:960px;height:960px;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 6%,transparent) 0%,transparent 58%);pointer-events:none;z-index:1;border-radius:50%;transform:translate(-50%,-50%);left:-500px;top:-500px;will-change:left,top;transition:left .06s linear,top .06s linear}
-@media(prefers-reduced-motion:reduce){.spotlight{display:none}.card{will-change:auto}}
+@media(prefers-reduced-motion:reduce){.spotlight{display:none}}
 </style>
 </head>
 <body>
@@ -1720,33 +1720,40 @@ document.addEventListener('keydown',e=>{
   spot.className='spotlight';
   document.body.appendChild(spot);
   let _tilt=null,_raf=null,_mx=-500,_my=-500;
-  const SKIP=['modal','card-part','card-progress','ex-edit-box'];
-  function tick(){spot.style.left=_mx+'px';spot.style.top=_my+'px';_raf=null;}
-  function resetTilt(c,spring){
+  // Classes que NÃO recebem tilt — cards muito pequenos ou dentro de listas
+  const NO_TILT=['column-card','card-part','card-progress','home-task','agenda-task','sparkline-card','ex-edit-box'];
+  function isTiltable(card){
+    if(!card)return false;
+    if(NO_TILT.some(c=>card.classList.contains(c)))return false;
+    if(card.closest('.modal'))return false;
+    // Deve ser um card de nível razoável (não dentro de outro card)
+    const parent=card.parentElement?.closest('.card');
+    return !parent;
+  }
+  function resetTilt(c){
     if(!c)return;
-    c.style.transition=spring?'transform 420ms cubic-bezier(0.34,1.2,0.64,1),box-shadow 300ms':'';
+    c.style.transition='transform 400ms cubic-bezier(0.34,1.2,0.64,1),box-shadow 300ms';
     c.style.transform='';c.style.boxShadow='';
   }
+  function tick(){spot.style.left=_mx+'px';spot.style.top=_my+'px';_raf=null;}
   document.addEventListener('mousemove',e=>{
     _mx=e.clientX;_my=e.clientY;
     if(!_raf)_raf=requestAnimationFrame(tick);
-    const el=e.target;
-    const card=el.closest?.('.card');
-    const skip=card&&SKIP.some(cls=>card.classList.contains(cls)||el.closest('.'+cls));
-    const safe=card&&!skip&&!card.closest('.modal')?card:null;
-    if(_tilt&&_tilt!==safe){resetTilt(_tilt,true);_tilt=null;}
+    const card=e.target.closest?.('.card');
+    const safe=isTiltable(card)?card:null;
+    if(_tilt&&_tilt!==safe){resetTilt(_tilt);_tilt=null;}
     if(safe){
-      if(_tilt!==safe){safe.style.transition='transform 80ms linear,box-shadow 200ms';_tilt=safe;}
+      if(_tilt!==safe){safe.style.transition='transform 80ms linear,box-shadow 180ms';_tilt=safe;}
       const r=safe.getBoundingClientRect();
       const dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
       const dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
-      safe.style.transform=`perspective(1000px) rotateY(${(dx*6).toFixed(2)}deg) rotateX(${(-dy*5).toFixed(2)}deg) translateY(-3px) scale(1.008)`;
-      safe.style.boxShadow='var(--shadow-lg),0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)';
+      safe.style.transform=`perspective(1000px) rotateY(${(dx*5).toFixed(2)}deg) rotateX(${(-dy*4).toFixed(2)}deg) translateY(-2px)`;
+      safe.style.boxShadow='var(--shadow-lg),0 0 0 1px color-mix(in srgb,var(--accent) 20%,transparent)';
     }
   });
   document.addEventListener('mouseleave',()=>{
     spot.style.left='-500px';spot.style.top='-500px';
-    resetTilt(_tilt,true);_tilt=null;
+    resetTilt(_tilt);_tilt=null;
   });
 })();
 </script>
