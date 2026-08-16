@@ -300,13 +300,13 @@ select option,select optgroup{background:var(--panel);color:var(--ink)}
   position:relative;border:0;border-radius:var(--radius-md);
   padding:11px 10px 10px 14px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.08),0 4px 14px color-mix(in srgb,var(--task-color,#888) 18%,transparent);
-  cursor:grab;will-change:transform;overflow:hidden;-webkit-tap-highlight-color:transparent;
+  cursor:grab;will-change:transform;-webkit-tap-highlight-color:transparent;
   background-image:linear-gradient(145deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.07) 45%,transparent 100%);
   animation:springIn 320ms var(--spring) calc(var(--i,0) * 22ms) both;
   transition:transform 180ms var(--spring),box-shadow 180ms var(--standard),filter 260ms var(--standard),opacity 260ms var(--standard);
 }
 .agenda-task .task-title{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
-.agenda-task:hover{transform:translateY(-3px) scale(1.008);box-shadow:inset 0 1px 0 rgba(255,255,255,.26),0 2px 6px rgba(0,0,0,.08),0 12px 28px color-mix(in srgb,var(--task-color,#888) 28%,transparent)}
+.agenda-task:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.26),0 2px 6px rgba(0,0,0,.08),0 12px 28px color-mix(in srgb,var(--task-color,#888) 28%,transparent)}
 .agenda-task:active{cursor:grabbing}
 .agenda-task.done{filter:grayscale(1) brightness(.96);opacity:.46;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .agenda-task.done .task-title{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:rgba(255,255,255,.36)}
@@ -1720,12 +1720,17 @@ document.addEventListener('keydown',e=>{
   spot.className='spotlight';
   document.body.appendChild(spot);
   let _tilt=null,_raf=null,_mx=-500,_my=-500;
-  // Allowlist: só esses card-types recebem tilt 3D
-  const TILT_ALLOW=['subject-card'];
-  function isTiltable(card){
-    if(!card)return false;
-    if(card.closest('.modal'))return false;
-    return TILT_ALLOW.some(c=>card.classList.contains(c));
+  function findTiltTarget(el){
+    // Procura .agenda-task ou .card.subject-card subindo o DOM
+    let node=el;
+    while(node&&node!==document.body){
+      if(node.classList){
+        if(node.classList.contains('agenda-task')&&!node.classList.contains('dragging'))return node;
+        if(node.classList.contains('subject-card'))return node;
+      }
+      node=node.parentElement;
+    }
+    return null;
   }
   function resetTilt(c){
     if(!c)return;
@@ -1736,8 +1741,7 @@ document.addEventListener('keydown',e=>{
   document.addEventListener('mousemove',e=>{
     _mx=e.clientX;_my=e.clientY;
     if(!_raf)_raf=requestAnimationFrame(tick);
-    const card=e.target.closest?.('.card');
-    const safe=isTiltable(card)?card:null;
+    const safe=findTiltTarget(e.target);
     if(_tilt&&_tilt!==safe){resetTilt(_tilt);_tilt=null;}
     if(safe){
       if(_tilt!==safe){safe.style.transition='transform 80ms linear,box-shadow 180ms';_tilt=safe;}
