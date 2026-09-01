@@ -1445,10 +1445,14 @@ function initFirebase(){
         if(_fbSkipRemote){_fbSkipRemote=false;return;}
         const remote=snap.val();
         if(!remote)return;
+        // Estado remoto semeado por outra versao do cronograma: aceita progresso, NAO as tarefas.
+        // Sem isso o app fica com seedVersion nova + tarefas antigas — e nunca mais re-semeia.
+        const staleSeed=remote.seedVersion!==CRONOGRAMA_VERSION;
         if(remote.lastSaved&&(!state.lastSaved||remote.lastSaved>state.lastSaved)){
-          const keepTheme=state.theme,keepKey=state.syncKey,keepSeed=state.seedVersion;
+          const keepTheme=state.theme,keepKey=state.syncKey,keepSeed=state.seedVersion,keepTasks=state.tasks;
           Object.assign(state,remote);
           state.theme=keepTheme;state.syncKey=keepKey;state.seedVersion=keepSeed;
+          if(staleSeed)state.tasks=keepTasks;
           syncWeekFromDate();
           document.documentElement.dataset.theme=state.theme;
           localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
